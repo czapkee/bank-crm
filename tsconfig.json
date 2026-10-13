@@ -22,12 +22,6 @@
       "path": "./client/main"
     },
     {
-      "path": "./api-libs/user-feature"
-    },
-    {
-      "path": "./api-libs/card-feature"
-    },
-    {
       "path": "./shared-libs/types"
     },
     {
@@ -35,6 +29,9 @@
     },
     {
       "path": "./client-libs/card-page"
+    },
+    {
+      "path": "./api-libs/auth-database"
     }
   ],
   "compilerOptions": {}

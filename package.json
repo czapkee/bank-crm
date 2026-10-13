@@ -9,7 +9,12 @@
     "all:dev": "nx run-many -t serve",
     "all:build": "nx run-many -t build",
     "all:lint": "nx run-many -t lint",
-    "all:lint-fix": "nx run-many -t lint --fix"
+    "all:lint-fix": "nx run-many -t lint --fix",
+    "auth-db:generate": "prisma generate --config api-libs/auth-database/prisma7.config.ts",
+    "auth-db:migrate-dev": "prisma migrate dev --config api-libs/auth-database/prisma7.config.ts",
+    "auth-db:migrate-deploy": "prisma migrate deploy --config api-libs/auth-database/prisma7.config.ts",
+    "auth-db:migrate-reset": "prisma migrate reset --config api-libs/auth-database/prisma7.config.ts",
+    "auth-db:studio": "prisma studio --config api-libs/auth-database/prisma7.config.ts"
   },
   "private": true,
   "dependencies": {
@@ -41,7 +46,7 @@
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "pinia": "^4.0.3",
-    "prisma": "^8.0.0-rc.22",
+    "prisma": "^7.10.0",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.0",
     "tailwindcss": "^4.3.3",
