@@ -1,0 +1,21 @@
+services:
+  auth-db:
+    image: postgres:18.6-alpine
+    container_name: auth-db
+    ports:
+      - '${AUTH_DB_PORT}:5432'
+    environment:
+      POSTGRES_USER: ${AUTH_DB_USER}
+      POSTGRES_PASSWORD: ${AUTH_DB_PASSWORD}
+      POSTGRES_DB: ${AUTH_DB_NAME}
+    volumes:
+      - auth_db_data:/var/lib/postgresql
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -U ${TAVERN_AUTH_DB_USER} -d ${TAVERN_AUTH_DB_NAME}',
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
