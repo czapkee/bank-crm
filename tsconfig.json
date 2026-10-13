@@ -2,6 +2,40 @@
   "extends": "./tsconfig.base.json",
   "compileOnSave": false,
   "files": [],
-  "references": [],
+  "references": [
+    {
+      "path": "./api/gateway"
+    },
+    {
+      "path": "./api/user"
+    },
+    {
+      "path": "./api/card"
+    },
+    {
+      "path": "./api/log"
+    },
+    {
+      "path": "./api/report"
+    },
+    {
+      "path": "./client/main"
+    },
+    {
+      "path": "./api-libs/user-feature"
+    },
+    {
+      "path": "./api-libs/card-feature"
+    },
+    {
+      "path": "./shared-libs/types"
+    },
+    {
+      "path": "./client-libs/user-page"
+    },
+    {
+      "path": "./client-libs/card-page"
+    }
+  ],
   "compilerOptions": {}
 }
