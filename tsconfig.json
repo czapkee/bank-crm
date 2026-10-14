@@ -31,7 +31,16 @@
       "path": "./client-libs/card-page"
     },
     {
-      "path": "./api-libs/auth-database"
+      "path": "./api-libs/card-database"
+    },
+    {
+      "path": "./api-libs/log-database"
+    },
+    {
+      "path": "./api-libs/report-database"
+    },
+    {
+      "path": "./api-libs/user-database"
     }
   ],
   "compilerOptions": {}
