@@ -10,13 +10,62 @@ datasource db {
 
 model Report {
   id        String   @id @default(uuid(7))
+
+  user UserSnapshot? @relation(fields: [userId], references: [userId], onDelete: SetNull)
+  userId String? @map("user_id")
+
+  assignedToId String? @map("assigned_to_id")
+  assignedTo UserSnapshot? @relation("AssignedReports", fields: [assignedToId], references: [userId], onDelete: SetNull)
+
+  title String
+  content String
+  feedbackContact String? @map("feedback_contact")
+
+  themeId String?
+  theme Theme? @relation(fields: [themeId], references: [id], onDelete: SetNull)
+
+  status ReportStatus @default(IN_PROCESS)
+  feedbackType ReportFeedback @default(NOT_REQUIRED)
+  priority ReportPriority @default(MEDIUM)
+
+  resolvedAt DateTime? @map("resolved_at")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([assignedToId])
+  @@index([feedbackType])
+  @@index([themeId, status])
+  @@index([userId])
+  @@map("reports")
+}
+
+model Theme {
+  id String @id @default(uuid(7))
+
+  name String @unique
+  description String?
+
+  parentId String? @map("parent_id")
+  parent Theme? @relation("ThemesHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children Theme[] @relation("ThemesHierarchy")
+
+  reports Report[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([parentId])
+  @@map("themes")
 }
 
 model UserSnapshot {
   id        String   @id @default(uuid(7))
   userId    String   @unique
+
+  reports Report[]
+  assignedReports Report[] @relation("AssignedReports")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -32,9 +81,16 @@ enum ReportStatus {
   CLOSED
 }
 
-enum ReportFeedBack {
+enum ReportFeedback {
   PHONE_NUMBER
   EMAIL
   NOT_REQUIRED
   OTHER
+}
+
+enum ReportPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
 }
