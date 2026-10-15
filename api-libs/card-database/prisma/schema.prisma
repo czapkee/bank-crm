@@ -11,7 +11,7 @@ datasource db {
 model Card {
   id String @id @default(uuid(7))
 
-  cardNumber    Int      @unique @map("card_number")
+  cardNumber    BigInt      @unique @map("card_number")
   accountNumber String   @unique @map("account_number") @db.VarChar(28)
   dateOfExpire  DateTime @map("date_of_expire")
   balance       Decimal  @db.Decimal(30, 2)
