@@ -1,9 +1,40 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
   moduleFormat = "cjs"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+model Report {
+  id        String   @id @default(uuid(7))
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+}
+
+model UserSnapshot {
+  id        String   @id @default(uuid(7))
+  userId    String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users_snapshots")
+}
+
+enum ReportStatus {
+  IN_PROCESS
+  ON_CONTROL
+  TAKE_ON_TASK
+  RETURNED_TO_INIT
+  RETURNED_TO_WORK
+  CLOSED
+}
+
+enum ReportFeedBack {
+  PHONE_NUMBER
+  EMAIL
+  NOT_REQUIRED
+  OTHER
 }

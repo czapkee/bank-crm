@@ -1,9 +1,94 @@
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
   moduleFormat = "cjs"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+model Card {
+  id String @id @default(uuid(7))
+
+  cardNumber    Int      @unique @map("card_number")
+  accountNumber String   @unique @map("account_number") @db.VarChar(28)
+  dateOfExpire  DateTime @map("date_of_expire")
+  balance       Decimal  @db.Decimal(30, 2)
+
+  status CardStatuses @default(CREATED)
+
+  userId   String       @map("user_id")
+  user     UserSnapshot @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  payments Payment[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@map("cards")
+}
+
+model Payment {
+  id String @id @default(uuid(7))
+
+  sum         Decimal           @db.Decimal(30, 2)
+  dateAndTime DateTime          @map("date_and_time")
+  service     String
+  reference   PaymentReference
+  status      CardPaymentStatus @default(IN_PROCESS)
+
+  cardId String @map("card_id")
+  card   Card   @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([cardId])
+  @@index([dateAndTime])
+  @@index([status], map: "payment_status_index")
+  @@map("payments")
+}
+
+model UserSnapshot {
+  id     String @id @default(uuid(7))
+  userId String @unique
+
+  cards Card[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users_snapshots")
+}
+
+enum CardStatuses {
+  CREATED
+  IN_PROCESS
+  PROCESSED
+  IN_DELIVERY
+  AT_CLIENT
+  EXPIRED
+  BLOCKED
+  DESTROYED
+  CLOSED
+}
+
+enum CardPaymentStatus {
+  IN_PROCESS
+  APPROVED
+  INSUFFICIENT_FUNDS
+  DENIED_BY_FROD
+  INCORRECT_CVV
+  LIMIT_EXCEEDED
+  INCORRECT_DATA
+  INCORRECT_3D
+}
+
+enum PaymentReference {
+  PAYMENT_FOR_GOODS_AND_SERVICES
+  RETURN_AND_REFUND
+  SALARY
+  ACCOUNT_TOP_UP_VIA_ERIP
+  CARD_TO_CARD_TRANSFER
 }
