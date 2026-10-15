@@ -10,6 +10,22 @@ datasource db {
 
 model Log {
   id        String   @id @default(uuid(7))
+
+  service String
+  entity String?
+  method String
+  action String
+
+  userId String? @map("user_id")
+  data Json?
+
+  userAgent String? @map("user_agent")
+
   createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([service, entity])
+  @@index([userId, createdAt])
+  @@index([method])
+  @@index([action])
+  @@map("logs")
 }
