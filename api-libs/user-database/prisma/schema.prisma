@@ -9,30 +9,31 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid(7))
+  id String @id @default(uuid(7))
 
-  name String
-  surname String
-  fatherName String? @map("father_name")
-  phoneNumber String @unique @map("phone_number")
+  name        String
+  surname     String
+  fatherName  String? @map("father_name")
+  phoneNumber String  @unique @map("phone_number")
 
-  isResident Boolean @default(true) @map("is_resident")
-  passport String @unique
-  codeWord String @map("code_word")
-  address String
+  isResident   Boolean @default(true) @map("is_resident")
+  identtifCode String  @unique @map("identif_code") @db.VarChar(14)
+  numPass      String  @unique @map("num_pass") @db.VarChar(9)
+  codeWord     String  @map("code_word")
+  address      String
 
-  clientId String? @unique @map("client_id")
-  client AuthClient?
+  clientId String?     @unique @map("client_id")
+  client   AuthClient?
 
-  employeeId String? @unique @map("employee_id")
-  employee AuthEmployee?
+  employeeId String?       @unique @map("employee_id")
+  employee   AuthEmployee?
 
   isActive Boolean @default(true) @map("is_active")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  @@index([passport])
+  @@index([numPass])
   @@index([address])
   @@index([name, surname])
   @@index([phoneNumber])
@@ -42,11 +43,11 @@ model User {
 model AuthClient {
   id String @id @default(uuid(7))
 
-  email String @unique
+  email        String @unique
   passwordHash String @map("password_hash")
 
   userId String @unique
-  user User @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -57,11 +58,11 @@ model AuthClient {
 model AuthEmployee {
   id String @id @default(uuid(7))
 
-  email String @unique
+  email        String  @unique
   passwordHash String? @map("password_hash")
 
   userId String @unique
-  user User @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
 
   role Roles @default(EMPLOYEE)
 
@@ -75,5 +76,6 @@ enum Roles {
   EMPLOYEE
   HEAD_OF_DEPARTMENT
   DIRECTOR
+  OPERATIONIST
   SUPERADMIN
 }
