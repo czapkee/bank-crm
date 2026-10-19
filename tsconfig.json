@@ -41,6 +41,9 @@
     },
     {
       "path": "./api-libs/user-database"
+    },
+    {
+      "path": "./api-libs/nest-launcher"
     }
   ],
   "compilerOptions": {}
