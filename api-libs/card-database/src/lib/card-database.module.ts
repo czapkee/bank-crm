@@ -6,4 +6,4 @@ import { CardDatabaseService } from './card-database.service';
 	providers: [CardDatabaseService],
 	exports: [CardDatabaseService],
 })
-export class OrgAuthDatabaseModule {}
+export class OrgCardDatabaseModule {}
