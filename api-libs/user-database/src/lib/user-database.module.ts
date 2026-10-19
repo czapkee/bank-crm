@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
 
+import { UserDatabaseService } from './user-database.service';
+
 @Module({
-	controllers: [],
-	providers: [],
-	exports: [],
+	providers: [UserDatabaseService],
+	exports: [UserDatabaseService],
 })
-export class OrgUserDatabaseModule {}
+export class UserDatabaseModule {}

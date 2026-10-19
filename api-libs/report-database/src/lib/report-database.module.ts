@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
 
+import { ReportDatabaseService } from './report-database.service';
+
 @Module({
-	controllers: [],
-	providers: [],
-	exports: [],
+	providers: [ReportDatabaseService],
+	exports: [ReportDatabaseService],
 })
 export class OrgReportDatabaseModule {}
