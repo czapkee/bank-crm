@@ -1,0 +1,8 @@
+syntax = 'proto3';
+
+package card;
+
+message Empty {}
+service TestService {
+  rpc Ping(Empty) returns (Empty);
+}

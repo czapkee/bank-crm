@@ -1,17 +1,19 @@
-import { Logger } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
+import { monolith } from '@org/nest-launcher';
 
 import { AppModule } from './app.module';
 
-async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule);
-  const globalPrefix = 'api';
-  app.setGlobalPrefix(globalPrefix);
-  const port = process.env.PORT || 3001;
-  await app.listen(port);
-  Logger.log(
-    `🚀 Application is running on: http://localhost:${port}/${globalPrefix}`,
-  );
-}
-
-bootstrap();
+void monolith({
+  module: AppModule,
+  scope: 'BANK-CRM',
+  name: 'Gateway',
+  logs: true,
+  prefix: true,
+  validation: true,
+  responseMap: true,
+  errorMap: true,
+  compression: true,
+  rateLimit: true,
+  cookie: true,
+  cors: true,
+  swagger: true,
+});
