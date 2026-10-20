@@ -1,8 +1,21 @@
 syntax = 'proto3';
 package user;
 
-message Empty {}
+import 'user/client.proto';
+import 'user/employee.proto';
 
-service TestService {
-  rpc Ping(Empty) returns (Empty);
+service ClientService {
+  rpc Register(client.RegisterInput) returns (client.AuthOutput);
+  rpc Login(client.LoginInput) returns (client.AuthOutput);
+  rpc Refresh(client.RefreshInput) returns (client.AuthOutput);
+  rpc Validate(client.ValidateInput) returns (client.UserPayload);
+  rpc GetMe(client.ValidateInput) returns (client.UserEntity);
+}
+
+service EmployeeService {
+  rpc Register(employee.RegisterInput) returns (employee.AuthOutput);
+  rpc Login(employee.LoginInput) returns (employee.AuthOutput);
+  rpc Refresh(employee.RefreshInput) returns (employee.AuthOutput);
+  rpc Validate(employee.ValidateInput) returns (employee.UserPayload);
+  rpc GetMe(employee.ValidateInput) returns (employee.UserEntity);
 }

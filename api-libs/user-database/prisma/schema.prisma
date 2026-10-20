@@ -75,7 +75,6 @@ model AuthEmployee {
 enum Roles {
   EMPLOYEE
   HEAD_OF_DEPARTMENT
-  DIRECTOR
   OPERATIONIST
   SUPERADMIN
 }
