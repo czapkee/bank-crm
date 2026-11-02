@@ -1,6 +1,8 @@
 syntax = 'proto3';
+
 package user;
 
+import 'shared/shared.proto';
 import 'user/client.proto';
 import 'user/employee.proto';
 
@@ -10,6 +12,9 @@ service ClientService {
   rpc Refresh(client.RefreshInput) returns (client.AuthOutput);
   rpc Validate(client.ValidateInput) returns (client.UserPayload);
   rpc GetMe(client.ValidateInput) returns (client.UserEntity);
+  rpc UpdateProfile(client.UpdateProfileInput) returns (client.UserEntity);
+  rpc ChangePassword(client.ChangePasswordInput) returns (shared.Empty);
+  rpc DeleteAccount(client.DeleteAccountInput) returns (shared.Empty);
 }
 
 service EmployeeService {
@@ -18,4 +23,30 @@ service EmployeeService {
   rpc Refresh(employee.RefreshInput) returns (employee.AuthOutput);
   rpc Validate(employee.ValidateInput) returns (employee.UserPayload);
   rpc GetMe(employee.ValidateInput) returns (employee.UserEntity);
+  rpc UpdateProfile(employee.UpdateProfileInput) returns (employee.UserEntity);
+  rpc ChangePassword(employee.ChangePasswordInput) returns (shared.Empty);
+  rpc DeleteAccount(employee.DeleteAccountInput) returns (shared.Empty);
+}
+
+service ClientAdminService {
+  rpc GetClients(employee.GetClientsInput) returns (employee.PaginatedClientsOutput);
+  rpc GetClient(employee.GetClientInput) returns (client.UserEntity);
+  rpc CreateClient(employee.CreateClientInput) returns (client.UserEntity);
+  rpc UpdateClient(employee.UpdateClientInput) returns (client.UserEntity);
+  rpc BlockClient(employee.ClientActionInput) returns (client.UserEntity);
+  rpc UnblockClient(employee.ClientActionInput) returns (client.UserEntity);
+  rpc ResetClientPassword(employee.ResetClientPasswordInput) returns (shared.Empty);
+  rpc DeleteClient(employee.ClientActionInput) returns (shared.Empty);
+}
+
+service EmployeeAdminService {
+  rpc GetEmployees(employee.GetEmployeesInput) returns (employee.PaginatedEmployeesOutput);
+  rpc GetEmployee(employee.GetEmployeeInput) returns (employee.UserEntity);
+  rpc CreateEmployee(employee.CreateEmployeeInput) returns (employee.UserEntity);
+  rpc UpdateEmployee(employee.UpdateEmployeeInput) returns (employee.UserEntity);
+  rpc ChangeEmployeeRole(employee.ChangeEmployeeRoleInput) returns (employee.UserEntity);
+  rpc BlockEmployee(employee.EmployeeActionInput) returns (employee.UserEntity);
+  rpc UnblockEmployee(employee.EmployeeActionInput) returns (employee.UserEntity);
+  rpc ResetEmployeePassword(employee.ResetEmployeePasswordInput) returns (shared.Empty);
+  rpc DeleteEmployee(employee.EmployeeActionInput) returns (shared.Empty);
 }

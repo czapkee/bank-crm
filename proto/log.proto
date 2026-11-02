@@ -2,7 +2,73 @@ syntax = 'proto3';
 
 package log;
 
-message Empty {}
-service TestService {
-  rpc Ping(Empty) returns (Empty);
+import 'user/employee.proto';
+
+message LogPaginationInput {
+  optional int32 page = 1;
+  optional int32 limit = 2;
+  optional string search = 3;
+  optional string service = 4;
+  optional string entity = 5;
+  optional string method = 6;
+  optional string action = 7;
+  optional string userId = 8;
+  optional string dateFrom = 9;
+  optional string dateTo = 10;
+}
+
+message GetLogsInput {
+  employee.ValidateInput validation = 1;
+  LogPaginationInput pagination = 2;
+}
+
+message GetLogInput {
+  employee.ValidateInput validation = 1;
+  string id = 2;
+}
+
+message GetLogsByUserInput {
+  employee.ValidateInput validation = 1;
+  string userId = 2;
+  LogPaginationInput pagination = 3;
+}
+
+message LogOutput {
+  string id = 1;
+  string service = 2;
+  optional string entity = 3;
+  string method = 4;
+  string action = 5;
+  optional string userId = 6;
+  optional string data = 7;
+  optional string userAgent = 8;
+  string createdAt = 9;
+}
+
+message LogPaginationOutput {
+  int32 page = 1;
+  int32 limit = 2;
+  int32 total = 3;
+  int32 totalPages = 4;
+  bool hasNext = 5;
+  bool hasPrev = 6;
+  optional string search = 7;
+  optional string service = 8;
+  optional string entity = 9;
+  optional string method = 10;
+  optional string action = 11;
+  optional string userId = 12;
+  optional string dateFrom = 13;
+  optional string dateTo = 14;
+}
+
+message PaginatedLogsOutput {
+  LogPaginationOutput pagination = 1;
+  repeated LogOutput logs = 2;
+}
+
+service LogService {
+  rpc GetLogs(GetLogsInput) returns (PaginatedLogsOutput);
+  rpc GetLog(GetLogInput) returns (LogOutput);
+  rpc GetLogsByUser(GetLogsByUserInput) returns (PaginatedLogsOutput);
 }

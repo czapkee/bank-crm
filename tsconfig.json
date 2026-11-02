@@ -22,9 +22,6 @@
       "path": "./client/main"
     },
     {
-      "path": "./shared-libs/types"
-    },
-    {
       "path": "./client-libs/user-page"
     },
     {
@@ -44,6 +41,18 @@
     },
     {
       "path": "./api-libs/nest-launcher"
+    },
+    {
+      "path": "./shared-libs/base-types"
+    },
+    {
+      "path": "./shared-libs/grpc-types"
+    },
+    {
+      "path": "./shared-libs/client-types"
+    },
+    {
+      "path": "./shared-libs/enums"
     }
   ],
   "compilerOptions": {}

@@ -2,7 +2,265 @@ syntax = 'proto3';
 
 package card;
 
-message Empty {}
-service TestService {
-  rpc Ping(Empty) returns (Empty);
+import 'shared/shared.proto';
+import 'user/client.proto';
+import 'user/employee.proto';
+
+enum CardStatuses {
+  CREATED = 0;
+  IN_PROCESS = 1;
+  PROCESSED = 2;
+  IN_DELIVERY = 3;
+  AT_CLIENT = 4;
+  EXPIRED = 5;
+  BLOCKED = 6;
+  DESTROYED = 7;
+  CLOSED = 8;
+}
+
+enum CardPaymentStatus {
+  PAYMENT_IN_PROCESS = 0;
+  APPROVED = 1;
+  INSUFFICIENT_FUNDS = 2;
+  DENIED_BY_FROD = 3;
+  INCORRECT_CVV = 4;
+  LIMIT_EXCEEDED = 5;
+  INCORRECT_DATA = 6;
+  INCORRECT_3D = 7;
+}
+
+enum PaymentReference {
+  PAYMENT_FOR_GOODS_AND_SERVICES = 0;
+  RETURN_AND_REFUND = 1;
+  SALARY = 2;
+  ACCOUNT_TOP_UP_VIA_ERIP = 3;
+  CARD_TO_CARD_TRANSFER = 4;
+}
+
+message CardPaginationInput {
+  optional int32 page = 1;
+  optional int32 limit = 2;
+  optional string search = 3;
+  optional CardStatuses status = 4;
+  optional string userId = 5;
+  optional string dateFrom = 6;
+  optional string dateTo = 7;
+}
+
+message GetMyCardsInput {
+  client.ValidateInput validation = 1;
+  CardPaginationInput pagination = 2;
+}
+
+message GetMyCardInput {
+  client.ValidateInput validation = 1;
+  string id = 2;
+}
+
+message GetCardsInput {
+  employee.ValidateInput validation = 1;
+  CardPaginationInput pagination = 2;
+}
+
+message GetCardInput {
+  employee.ValidateInput validation = 1;
+  string id = 2;
+}
+
+message GetUserCardsInput {
+  employee.ValidateInput validation = 1;
+  string userId = 2;
+  CardPaginationInput pagination = 3;
+}
+
+message CreateCardInput {
+  employee.ValidateInput validation = 1;
+  string cardNumber = 2;
+  string accountNumber = 3;
+  string dateOfExpire = 4;
+  string balance = 5;
+  optional CardStatuses status = 6;
+  string userId = 7;
+}
+
+message UpdateCardInput {
+  employee.ValidateInput validation = 1;
+  string id = 2;
+  optional string accountNumber = 3;
+  optional string dateOfExpire = 4;
+  optional string balance = 5;
+  optional CardStatuses status = 6;
+}
+
+message ChangeCardStatusInput {
+  employee.ValidateInput validation = 1;
+  string id = 2;
+  CardStatuses status = 3;
+}
+
+message CardActionInput {
+  employee.ValidateInput validation = 1;
+  string id = 2;
+}
+
+message CardOutput {
+  string id = 1;
+  string cardNumber = 2;
+  string accountNumber = 3;
+  string dateOfExpire = 4;
+  string balance = 5;
+  CardStatuses status = 6;
+  string userId = 7;
+  string createdAt = 8;
+  string updatedAt = 9;
+}
+
+message CardPaginationOutput {
+  int32 page = 1;
+  int32 limit = 2;
+  int32 total = 3;
+  int32 totalPages = 4;
+  bool hasNext = 5;
+  bool hasPrev = 6;
+  optional string search = 7;
+  optional CardStatuses status = 8;
+  optional string userId = 9;
+  optional string dateFrom = 10;
+  optional string dateTo = 11;
+}
+
+message PaginatedCardsOutput {
+  CardPaginationOutput pagination = 1;
+  repeated CardOutput cards = 2;
+}
+
+message PaymentPaginationInput {
+  optional int32 page = 1;
+  optional int32 limit = 2;
+  optional string search = 3;
+  optional CardPaymentStatus status = 4;
+  optional PaymentReference reference = 5;
+  optional string cardId = 6;
+  optional string dateFrom = 7;
+  optional string dateTo = 8;
+}
+
+message WriteOffCardInput {
+  client.ValidateInput validation = 1;
+  string cardId = 2;
+  string sum = 3;
+  string service = 4;
+  PaymentReference reference = 5;
+}
+
+message GetMyPaymentsInput {
+  client.ValidateInput validation = 1;
+  PaymentPaginationInput pagination = 2;
+}
+
+message GetMyCardPaymentsInput {
+  client.ValidateInput validation = 1;
+  string cardId = 2;
+  PaymentPaginationInput pagination = 3;
+}
+
+message GetPaymentsInput {
+  employee.ValidateInput validation = 1;
+  PaymentPaginationInput pagination = 2;
+}
+
+message GetPaymentInput {
+  employee.ValidateInput validation = 1;
+  string id = 2;
+}
+
+message GetCardPaymentsInput {
+  employee.ValidateInput validation = 1;
+  string cardId = 2;
+  PaymentPaginationInput pagination = 3;
+}
+
+message CreatePaymentInput {
+  employee.ValidateInput validation = 1;
+  string cardId = 2;
+  string sum = 3;
+  string dateAndTime = 4;
+  string service = 5;
+  PaymentReference reference = 6;
+  optional CardPaymentStatus status = 7;
+}
+
+message ChangePaymentStatusInput {
+  employee.ValidateInput validation = 1;
+  string id = 2;
+  CardPaymentStatus status = 3;
+}
+
+message PaymentActionInput {
+  employee.ValidateInput validation = 1;
+  string id = 2;
+}
+
+message PaymentOutput {
+  string id = 1;
+  string sum = 2;
+  string dateAndTime = 3;
+  string service = 4;
+  PaymentReference reference = 5;
+  CardPaymentStatus status = 6;
+  string cardId = 7;
+  string createdAt = 8;
+  string updatedAt = 9;
+}
+
+message PaymentPaginationOutput {
+  int32 page = 1;
+  int32 limit = 2;
+  int32 total = 3;
+  int32 totalPages = 4;
+  bool hasNext = 5;
+  bool hasPrev = 6;
+  optional string search = 7;
+  optional CardPaymentStatus status = 8;
+  optional PaymentReference reference = 9;
+  optional string cardId = 10;
+  optional string dateFrom = 11;
+  optional string dateTo = 12;
+}
+
+message PaginatedPaymentsOutput {
+  PaymentPaginationOutput pagination = 1;
+  repeated PaymentOutput payments = 2;
+}
+
+service CardService {
+  rpc GetMyCards(GetMyCardsInput) returns (PaginatedCardsOutput);
+  rpc GetMyCard(GetMyCardInput) returns (CardOutput);
+}
+
+service CardAdminService {
+  rpc GetCards(GetCardsInput) returns (PaginatedCardsOutput);
+  rpc GetCard(GetCardInput) returns (CardOutput);
+  rpc GetUserCards(GetUserCardsInput) returns (PaginatedCardsOutput);
+  rpc CreateCard(CreateCardInput) returns (CardOutput);
+  rpc UpdateCard(UpdateCardInput) returns (CardOutput);
+  rpc ChangeCardStatus(ChangeCardStatusInput) returns (CardOutput);
+  rpc BlockCard(CardActionInput) returns (CardOutput);
+  rpc UnblockCard(CardActionInput) returns (CardOutput);
+  rpc DeleteCard(CardActionInput) returns (shared.Empty);
+}
+
+service PaymentService {
+  rpc WriteOffCard(WriteOffCardInput) returns (PaymentOutput);
+  rpc GetMyPayments(GetMyPaymentsInput) returns (PaginatedPaymentsOutput);
+  rpc GetMyCardPayments(GetMyCardPaymentsInput) returns (PaginatedPaymentsOutput);
+}
+
+service PaymentAdminService {
+  rpc GetPayments(GetPaymentsInput) returns (PaginatedPaymentsOutput);
+  rpc GetPayment(GetPaymentInput) returns (PaymentOutput);
+  rpc GetCardPayments(GetCardPaymentsInput) returns (PaginatedPaymentsOutput);
+  rpc CreatePayment(CreatePaymentInput) returns (PaymentOutput);
+  rpc ChangePaymentStatus(ChangePaymentStatusInput) returns (PaymentOutput);
+  rpc DeletePayment(PaymentActionInput) returns (shared.Empty);
 }

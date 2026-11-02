@@ -2,6 +2,8 @@ syntax = 'proto3';
 
 package employee;
 
+import 'user/client.proto';
+
 enum Roles {
   EMPLOYEE = 0;
   HEAD_OF_DEPARTMENT = 1;
@@ -29,9 +31,28 @@ message ValidateInput {
 }
 
 message ChangePasswordInput {
-  string oldPassword = 1;
-  string newPassword = 2;
-  string newPasswordConfirmation = 3;
+  ValidateInput validation = 1;
+  string oldPassword = 2;
+  string newPassword = 3;
+  string newPasswordConfirmation = 4;
+}
+
+message UpdateProfileInput {
+  ValidateInput validation = 1;
+  optional string name = 2;
+  optional string surname = 3;
+  optional string fatherName = 4;
+  optional string phoneNumber = 5;
+  optional bool isResident = 6;
+  optional string identifCode = 7;
+  optional string numPass = 8;
+  optional string codeWord = 9;
+  optional string address = 10;
+}
+
+message DeleteAccountInput {
+  ValidateInput validation = 1;
+  string password = 2;
 }
 
 message AuthOutput {
@@ -50,4 +71,176 @@ message UserEntity {
   string createdAt = 3;
   string updatedAt = 4;
   Roles role = 5;
+  string name = 6;
+  string surname = 7;
+  optional string fatherName = 8;
+  string phoneNumber = 9;
+  bool isResident = 10;
+  string identifCode = 11;
+  string numPass = 12;
+  string codeWord = 13;
+  string address = 14;
+  bool isActive = 15;
+}
+
+message ClientPaginationInput {
+  optional int32 page = 1;
+  optional int32 limit = 2;
+  optional string search = 3;
+  optional bool isActive = 4;
+  optional bool isResident = 5;
+}
+
+message GetClientsInput {
+  ValidateInput validation = 1;
+  ClientPaginationInput pagination = 2;
+}
+
+message GetClientInput {
+  ValidateInput validation = 1;
+  string id = 2;
+}
+
+message CreateClientInput {
+  ValidateInput validation = 1;
+  string email = 2;
+  string password = 3;
+  string confirmationPassword = 4;
+  string name = 5;
+  string surname = 6;
+  optional string fatherName = 7;
+  string phoneNumber = 8;
+  bool isResident = 9;
+  string identifCode = 10;
+  string numPass = 11;
+  string codeWord = 12;
+  string address = 13;
+}
+
+message UpdateClientInput {
+  ValidateInput validation = 1;
+  string id = 2;
+  optional string email = 3;
+  optional string name = 4;
+  optional string surname = 5;
+  optional string fatherName = 6;
+  optional string phoneNumber = 7;
+  optional bool isResident = 8;
+  optional string identifCode = 9;
+  optional string numPass = 10;
+  optional string codeWord = 11;
+  optional string address = 12;
+}
+
+message ClientActionInput {
+  ValidateInput validation = 1;
+  string id = 2;
+}
+
+message ResetClientPasswordInput {
+  ValidateInput validation = 1;
+  string id = 2;
+  string newPassword = 3;
+}
+
+message ClientPaginationOutput {
+  int32 page = 1;
+  int32 limit = 2;
+  int32 total = 3;
+  int32 totalPages = 4;
+  bool hasNext = 5;
+  bool hasPrev = 6;
+  optional string search = 7;
+  optional bool isActive = 8;
+  optional bool isResident = 9;
+}
+
+message PaginatedClientsOutput {
+  ClientPaginationOutput pagination = 1;
+  repeated client.UserEntity clients = 2;
+}
+
+message EmployeePaginationInput {
+  optional int32 page = 1;
+  optional int32 limit = 2;
+  optional string search = 3;
+  optional Roles role = 4;
+  optional bool isActive = 5;
+}
+
+message GetEmployeesInput {
+  ValidateInput validation = 1;
+  EmployeePaginationInput pagination = 2;
+}
+
+message GetEmployeeInput {
+  ValidateInput validation = 1;
+  string id = 2;
+}
+
+message CreateEmployeeInput {
+  ValidateInput validation = 1;
+  string email = 2;
+  string password = 3;
+  string confirmationPassword = 4;
+  string name = 5;
+  string surname = 6;
+  optional string fatherName = 7;
+  string phoneNumber = 8;
+  bool isResident = 9;
+  string identifCode = 10;
+  string numPass = 11;
+  string codeWord = 12;
+  string address = 13;
+  Roles role = 14;
+}
+
+message UpdateEmployeeInput {
+  ValidateInput validation = 1;
+  string id = 2;
+  optional string email = 3;
+  optional string name = 4;
+  optional string surname = 5;
+  optional string fatherName = 6;
+  optional string phoneNumber = 7;
+  optional bool isResident = 8;
+  optional string identifCode = 9;
+  optional string numPass = 10;
+  optional string codeWord = 11;
+  optional string address = 12;
+  optional Roles role = 13;
+}
+
+message ChangeEmployeeRoleInput {
+  ValidateInput validation = 1;
+  string id = 2;
+  Roles role = 3;
+}
+
+message EmployeeActionInput {
+  ValidateInput validation = 1;
+  string id = 2;
+}
+
+message ResetEmployeePasswordInput {
+  ValidateInput validation = 1;
+  string id = 2;
+  string newPassword = 3;
+}
+
+message EmployeePaginationOutput {
+  int32 page = 1;
+  int32 limit = 2;
+  int32 total = 3;
+  int32 totalPages = 4;
+  bool hasNext = 5;
+  bool hasPrev = 6;
+  optional string search = 7;
+  optional Roles role = 8;
+  optional bool isActive = 9;
+}
+
+message PaginatedEmployeesOutput {
+  EmployeePaginationOutput pagination = 1;
+  repeated UserEntity employees = 2;
 }
