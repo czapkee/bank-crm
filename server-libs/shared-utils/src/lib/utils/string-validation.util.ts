@@ -1,0 +1,41 @@
+import { status } from '@grpc/grpc-js'
+import { Injectable } from '@nestjs/common'
+import { RpcException } from '@nestjs/microservices'
+import { SHARED_CONFIG } from '@org/validation-config'
+import { SHARED_MESSAGES } from '@org/validation-messages'
+
+@Injectable()
+export class StringValidationUtil {
+  validateId(id: string): void {
+    if (!id || !this.validateUUIDV7(id)) {
+      this.throwRPCError(SHARED_MESSAGES.INVALID_ID)
+    }
+  }
+
+  validateEmail(email: string): void {
+    if (!email || !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
+      this.throwRPCError(SHARED_MESSAGES.INVALID_EMAIL)
+    }
+  }
+
+  validateAnyString(value: string, type: string): void {
+    if (!value) {
+      this.throwRPCError(type)
+    }
+  }
+
+  validateUUIDV7(id: string): boolean {
+    if (SHARED_CONFIG.ID.VERSION !== 7) {
+      return false
+    }
+
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)
+  }
+
+  private throwRPCError(arg: string): void {
+    throw new RpcException({
+      message: SHARED_MESSAGES.RPC_ERROR(arg),
+      code: status.INVALID_ARGUMENT,
+    })
+  }
+}

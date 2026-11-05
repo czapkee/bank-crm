@@ -35,6 +35,9 @@ export async function microservice<T>(
       protoPath: join(workspaceRoot, GRPC_PROTO_PATH),
       package: GRPC_PROTO_PACKAGE,
       url: `0.0.0.0:${env.GRPC_PORT}`,
+      loader: {
+        includeDirs: [join(workspaceRoot, 'proto')],
+      },
     },
   });
   if (options.rabbitMQ) {

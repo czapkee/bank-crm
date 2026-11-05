@@ -1,0 +1,18 @@
+export const AUTH_CONFIG = {
+  PASSWORD: {
+    MIN_LENGTH: 8,
+    MIN_LOWERCASE: 1,
+    MIN_UPPERCASE: 1,
+    MIN_NUMBERS: 1,
+    MIN_SYMBOLS: 0,
+  },
+  EMAIL: {
+    MIN_LENGTH: 3,
+    MAX_LENGTH: 254,
+    ALLOW_IP_DOMAINS: false,
+  },
+  TOKEN: {
+    ACCESS_EXPIRE_MINUTES: 15,
+    REFRESH_EXPIRE_DAYS: 30,
+  },
+} as const

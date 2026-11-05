@@ -2,7 +2,7 @@ syntax = 'proto3';
 
 package log;
 
-import 'user/employee.proto';
+import 'user.proto';
 
 message LogPaginationInput {
   optional int32 page = 1;
@@ -18,17 +18,17 @@ message LogPaginationInput {
 }
 
 message GetLogsInput {
-  employee.ValidateInput validation = 1;
+  user.EmployeeValidateInput validation = 1;
   LogPaginationInput pagination = 2;
 }
 
 message GetLogInput {
-  employee.ValidateInput validation = 1;
+  user.EmployeeValidateInput validation = 1;
   string id = 2;
 }
 
 message GetLogsByUserInput {
-  employee.ValidateInput validation = 1;
+  user.EmployeeValidateInput validation = 1;
   string userId = 2;
   LogPaginationInput pagination = 3;
 }

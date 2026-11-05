@@ -3,8 +3,7 @@ syntax = 'proto3';
 package card;
 
 import 'shared/shared.proto';
-import 'user/client.proto';
-import 'user/employee.proto';
+import 'user.proto';
 
 enum CardStatuses {
   CREATED = 0;
@@ -48,33 +47,33 @@ message CardPaginationInput {
 }
 
 message GetMyCardsInput {
-  client.ValidateInput validation = 1;
+  user.ClientValidateInput validation = 1;
   CardPaginationInput pagination = 2;
 }
 
 message GetMyCardInput {
-  client.ValidateInput validation = 1;
+  user.ClientValidateInput validation = 1;
   string id = 2;
 }
 
 message GetCardsInput {
-  employee.ValidateInput validation = 1;
+  user.EmployeeValidateInput validation = 1;
   CardPaginationInput pagination = 2;
 }
 
 message GetCardInput {
-  employee.ValidateInput validation = 1;
+  user.EmployeeValidateInput validation = 1;
   string id = 2;
 }
 
 message GetUserCardsInput {
-  employee.ValidateInput validation = 1;
+  user.EmployeeValidateInput validation = 1;
   string userId = 2;
   CardPaginationInput pagination = 3;
 }
 
 message CreateCardInput {
-  employee.ValidateInput validation = 1;
+  user.EmployeeValidateInput validation = 1;
   string cardNumber = 2;
   string accountNumber = 3;
   string dateOfExpire = 4;
@@ -84,7 +83,7 @@ message CreateCardInput {
 }
 
 message UpdateCardInput {
-  employee.ValidateInput validation = 1;
+  user.EmployeeValidateInput validation = 1;
   string id = 2;
   optional string accountNumber = 3;
   optional string dateOfExpire = 4;
@@ -93,13 +92,13 @@ message UpdateCardInput {
 }
 
 message ChangeCardStatusInput {
-  employee.ValidateInput validation = 1;
+  user.EmployeeValidateInput validation = 1;
   string id = 2;
   CardStatuses status = 3;
 }
 
 message CardActionInput {
-  employee.ValidateInput validation = 1;
+  user.EmployeeValidateInput validation = 1;
   string id = 2;
 }
 
@@ -146,7 +145,7 @@ message PaymentPaginationInput {
 }
 
 message WriteOffCardInput {
-  client.ValidateInput validation = 1;
+  user.ClientValidateInput validation = 1;
   string cardId = 2;
   string sum = 3;
   string service = 4;
@@ -154,34 +153,34 @@ message WriteOffCardInput {
 }
 
 message GetMyPaymentsInput {
-  client.ValidateInput validation = 1;
+  user.ClientValidateInput validation = 1;
   PaymentPaginationInput pagination = 2;
 }
 
 message GetMyCardPaymentsInput {
-  client.ValidateInput validation = 1;
+  user.ClientValidateInput validation = 1;
   string cardId = 2;
   PaymentPaginationInput pagination = 3;
 }
 
 message GetPaymentsInput {
-  employee.ValidateInput validation = 1;
+  user.EmployeeValidateInput validation = 1;
   PaymentPaginationInput pagination = 2;
 }
 
 message GetPaymentInput {
-  employee.ValidateInput validation = 1;
+  user.EmployeeValidateInput validation = 1;
   string id = 2;
 }
 
 message GetCardPaymentsInput {
-  employee.ValidateInput validation = 1;
+  user.EmployeeValidateInput validation = 1;
   string cardId = 2;
   PaymentPaginationInput pagination = 3;
 }
 
 message CreatePaymentInput {
-  employee.ValidateInput validation = 1;
+  user.EmployeeValidateInput validation = 1;
   string cardId = 2;
   string sum = 3;
   string dateAndTime = 4;
@@ -191,13 +190,13 @@ message CreatePaymentInput {
 }
 
 message ChangePaymentStatusInput {
-  employee.ValidateInput validation = 1;
+  user.EmployeeValidateInput validation = 1;
   string id = 2;
   CardPaymentStatus status = 3;
 }
 
 message PaymentActionInput {
-  employee.ValidateInput validation = 1;
+  user.EmployeeValidateInput validation = 1;
   string id = 2;
 }
 

@@ -3,50 +3,359 @@ syntax = 'proto3';
 package user;
 
 import 'shared/shared.proto';
-import 'user/client.proto';
-import 'user/employee.proto';
+
+enum Roles {
+  EMPLOYEE = 0;
+  HEAD_OF_DEPARTMENT = 1;
+  OPERATIONIST = 2;
+  SUPERADMIN = 3;
+}
+
+message ClientRegisterInput {
+  string email = 1;
+  string password = 2;
+  string confirmationPassword = 3;
+}
+
+message ClientLoginInput {
+  string email = 1;
+  string password = 2;
+}
+
+message ClientRefreshInput {
+  string refreshToken = 1;
+}
+
+message ClientValidateInput {
+  string accessToken = 1;
+}
+
+message ClientChangePasswordInput {
+  ClientValidateInput validation = 1;
+  string oldPassword = 2;
+  string newPassword = 3;
+  string newPasswordConfirmation = 4;
+}
+
+message ClientUpdateProfileInput {
+  ClientValidateInput validation = 1;
+  optional string name = 2;
+  optional string surname = 3;
+  optional string fatherName = 4;
+  optional string phoneNumber = 5;
+  optional bool isResident = 6;
+  optional string identifCode = 7;
+  optional string numPass = 8;
+  optional string codeWord = 9;
+  optional string address = 10;
+}
+
+message ClientDeleteAccountInput {
+  ClientValidateInput validation = 1;
+  string password = 2;
+}
+
+message ClientAuthOutput {
+  string accessToken = 1;
+  string refreshToken = 2;
+}
+
+message ClientUserPayload {
+  string id = 1;
+}
+
+message ClientUserEntity {
+  string id = 1;
+  string email = 2;
+  string createdAt = 5;
+  string updatedAt = 6;
+  string name = 3;
+  string surname = 4;
+  optional string fatherName = 7;
+  string phoneNumber = 8;
+  bool isResident = 9;
+  string identifCode = 10;
+  string numPass = 11;
+  string codeWord = 12;
+  string address = 13;
+  bool isActive = 14;
+}
+
+message EmployeeRegisterInput {
+  string email = 1;
+  string password = 2;
+  string confirmationPassword = 3;
+}
+
+message EmployeeLoginInput {
+  string email = 1;
+  string password = 2;
+}
+
+message EmployeeRefreshInput {
+  string refreshToken = 1;
+}
+
+message EmployeeValidateInput {
+  string accessToken = 1;
+}
+
+message EmployeeChangePasswordInput {
+  EmployeeValidateInput validation = 1;
+  string oldPassword = 2;
+  string newPassword = 3;
+  string newPasswordConfirmation = 4;
+}
+
+message EmployeeUpdateProfileInput {
+  EmployeeValidateInput validation = 1;
+  optional string name = 2;
+  optional string surname = 3;
+  optional string fatherName = 4;
+  optional string phoneNumber = 5;
+  optional bool isResident = 6;
+  optional string identifCode = 7;
+  optional string numPass = 8;
+  optional string codeWord = 9;
+  optional string address = 10;
+}
+
+message EmployeeDeleteAccountInput {
+  EmployeeValidateInput validation = 1;
+  string password = 2;
+}
+
+message EmployeeAuthOutput {
+  string accessToken = 1;
+  string refreshToken = 2;
+}
+
+message EmployeeUserPayload {
+  string id = 1;
+  Roles role = 2;
+}
+
+message EmployeeUserEntity {
+  string id = 1;
+  string email = 2;
+  string createdAt = 3;
+  string updatedAt = 4;
+  Roles role = 5;
+  string name = 6;
+  string surname = 7;
+  optional string fatherName = 8;
+  string phoneNumber = 9;
+  bool isResident = 10;
+  string identifCode = 11;
+  string numPass = 12;
+  string codeWord = 13;
+  string address = 14;
+  bool isActive = 15;
+}
+
+message ClientPaginationInput {
+  optional int32 page = 1;
+  optional int32 limit = 2;
+  optional string search = 3;
+  optional bool isActive = 4;
+  optional bool isResident = 5;
+}
+
+message GetClientsInput {
+  EmployeeValidateInput validation = 1;
+  ClientPaginationInput pagination = 2;
+}
+
+message GetClientInput {
+  EmployeeValidateInput validation = 1;
+  string id = 2;
+}
+
+message CreateClientInput {
+  EmployeeValidateInput validation = 1;
+  string email = 2;
+  string password = 3;
+  string confirmationPassword = 4;
+  string name = 5;
+  string surname = 6;
+  optional string fatherName = 7;
+  string phoneNumber = 8;
+  bool isResident = 9;
+  string identifCode = 10;
+  string numPass = 11;
+  string codeWord = 12;
+  string address = 13;
+}
+
+message UpdateClientInput {
+  EmployeeValidateInput validation = 1;
+  string id = 2;
+  optional string email = 3;
+  optional string name = 4;
+  optional string surname = 5;
+  optional string fatherName = 6;
+  optional string phoneNumber = 7;
+  optional bool isResident = 8;
+  optional string identifCode = 9;
+  optional string numPass = 10;
+  optional string codeWord = 11;
+  optional string address = 12;
+}
+
+message ClientActionInput {
+  EmployeeValidateInput validation = 1;
+  string id = 2;
+}
+
+message ResetClientPasswordInput {
+  EmployeeValidateInput validation = 1;
+  string id = 2;
+  string newPassword = 3;
+}
+
+message ClientPaginationOutput {
+  int32 page = 1;
+  int32 limit = 2;
+  int32 total = 3;
+  int32 totalPages = 4;
+  bool hasNext = 5;
+  bool hasPrev = 6;
+  optional string search = 7;
+  optional bool isActive = 8;
+  optional bool isResident = 9;
+}
+
+message PaginatedClientsOutput {
+  ClientPaginationOutput pagination = 1;
+  repeated ClientUserEntity clients = 2;
+}
+
+message EmployeePaginationInput {
+  optional int32 page = 1;
+  optional int32 limit = 2;
+  optional string search = 3;
+  optional Roles role = 4;
+  optional bool isActive = 5;
+}
+
+message GetEmployeesInput {
+  EmployeeValidateInput validation = 1;
+  EmployeePaginationInput pagination = 2;
+}
+
+message GetEmployeeInput {
+  EmployeeValidateInput validation = 1;
+  string id = 2;
+}
+
+message CreateEmployeeInput {
+  EmployeeValidateInput validation = 1;
+  string email = 2;
+  string password = 3;
+  string confirmationPassword = 4;
+  string name = 5;
+  string surname = 6;
+  optional string fatherName = 7;
+  string phoneNumber = 8;
+  bool isResident = 9;
+  string identifCode = 10;
+  string numPass = 11;
+  string codeWord = 12;
+  string address = 13;
+  Roles role = 14;
+}
+
+message UpdateEmployeeInput {
+  EmployeeValidateInput validation = 1;
+  string id = 2;
+  optional string email = 3;
+  optional string name = 4;
+  optional string surname = 5;
+  optional string fatherName = 6;
+  optional string phoneNumber = 7;
+  optional bool isResident = 8;
+  optional string identifCode = 9;
+  optional string numPass = 10;
+  optional string codeWord = 11;
+  optional string address = 12;
+  optional Roles role = 13;
+}
+
+message ChangeEmployeeRoleInput {
+  EmployeeValidateInput validation = 1;
+  string id = 2;
+  Roles role = 3;
+}
+
+message EmployeeActionInput {
+  EmployeeValidateInput validation = 1;
+  string id = 2;
+}
+
+message ResetEmployeePasswordInput {
+  EmployeeValidateInput validation = 1;
+  string id = 2;
+  string newPassword = 3;
+}
+
+message EmployeePaginationOutput {
+  int32 page = 1;
+  int32 limit = 2;
+  int32 total = 3;
+  int32 totalPages = 4;
+  bool hasNext = 5;
+  bool hasPrev = 6;
+  optional string search = 7;
+  optional Roles role = 8;
+  optional bool isActive = 9;
+}
+
+message PaginatedEmployeesOutput {
+  EmployeePaginationOutput pagination = 1;
+  repeated EmployeeUserEntity employees = 2;
+}
 
 service ClientService {
-  rpc Register(client.RegisterInput) returns (client.AuthOutput);
-  rpc Login(client.LoginInput) returns (client.AuthOutput);
-  rpc Refresh(client.RefreshInput) returns (client.AuthOutput);
-  rpc Validate(client.ValidateInput) returns (client.UserPayload);
-  rpc GetMe(client.ValidateInput) returns (client.UserEntity);
-  rpc UpdateProfile(client.UpdateProfileInput) returns (client.UserEntity);
-  rpc ChangePassword(client.ChangePasswordInput) returns (shared.Empty);
-  rpc DeleteAccount(client.DeleteAccountInput) returns (shared.Empty);
+  rpc Register(ClientRegisterInput) returns (ClientAuthOutput);
+  rpc Login(ClientLoginInput) returns (ClientAuthOutput);
+  rpc Refresh(ClientRefreshInput) returns (ClientAuthOutput);
+  rpc Validate(ClientValidateInput) returns (ClientUserPayload);
+  rpc GetMe(ClientValidateInput) returns (ClientUserEntity);
+  rpc UpdateProfile(ClientUpdateProfileInput) returns (ClientUserEntity);
+  rpc ChangePassword(ClientChangePasswordInput) returns (shared.Empty);
+  rpc DeleteAccount(ClientDeleteAccountInput) returns (shared.Empty);
 }
 
 service EmployeeService {
-  rpc Register(employee.RegisterInput) returns (employee.AuthOutput);
-  rpc Login(employee.LoginInput) returns (employee.AuthOutput);
-  rpc Refresh(employee.RefreshInput) returns (employee.AuthOutput);
-  rpc Validate(employee.ValidateInput) returns (employee.UserPayload);
-  rpc GetMe(employee.ValidateInput) returns (employee.UserEntity);
-  rpc UpdateProfile(employee.UpdateProfileInput) returns (employee.UserEntity);
-  rpc ChangePassword(employee.ChangePasswordInput) returns (shared.Empty);
-  rpc DeleteAccount(employee.DeleteAccountInput) returns (shared.Empty);
+  rpc Register(EmployeeRegisterInput) returns (EmployeeAuthOutput);
+  rpc Login(EmployeeLoginInput) returns (EmployeeAuthOutput);
+  rpc Refresh(EmployeeRefreshInput) returns (EmployeeAuthOutput);
+  rpc Validate(EmployeeValidateInput) returns (EmployeeUserPayload);
+  rpc GetMe(EmployeeValidateInput) returns (EmployeeUserEntity);
+  rpc UpdateProfile(EmployeeUpdateProfileInput) returns (EmployeeUserEntity);
+  rpc ChangePassword(EmployeeChangePasswordInput) returns (shared.Empty);
+  rpc DeleteAccount(EmployeeDeleteAccountInput) returns (shared.Empty);
 }
 
 service ClientAdminService {
-  rpc GetClients(employee.GetClientsInput) returns (employee.PaginatedClientsOutput);
-  rpc GetClient(employee.GetClientInput) returns (client.UserEntity);
-  rpc CreateClient(employee.CreateClientInput) returns (client.UserEntity);
-  rpc UpdateClient(employee.UpdateClientInput) returns (client.UserEntity);
-  rpc BlockClient(employee.ClientActionInput) returns (client.UserEntity);
-  rpc UnblockClient(employee.ClientActionInput) returns (client.UserEntity);
-  rpc ResetClientPassword(employee.ResetClientPasswordInput) returns (shared.Empty);
-  rpc DeleteClient(employee.ClientActionInput) returns (shared.Empty);
+  rpc GetClients(GetClientsInput) returns (PaginatedClientsOutput);
+  rpc GetClient(GetClientInput) returns (ClientUserEntity);
+  rpc CreateClient(CreateClientInput) returns (ClientUserEntity);
+  rpc UpdateClient(UpdateClientInput) returns (ClientUserEntity);
+  rpc BlockClient(ClientActionInput) returns (ClientUserEntity);
+  rpc UnblockClient(ClientActionInput) returns (ClientUserEntity);
+  rpc ResetClientPassword(ResetClientPasswordInput) returns (shared.Empty);
+  rpc DeleteClient(ClientActionInput) returns (shared.Empty);
 }
 
 service EmployeeAdminService {
-  rpc GetEmployees(employee.GetEmployeesInput) returns (employee.PaginatedEmployeesOutput);
-  rpc GetEmployee(employee.GetEmployeeInput) returns (employee.UserEntity);
-  rpc CreateEmployee(employee.CreateEmployeeInput) returns (employee.UserEntity);
-  rpc UpdateEmployee(employee.UpdateEmployeeInput) returns (employee.UserEntity);
-  rpc ChangeEmployeeRole(employee.ChangeEmployeeRoleInput) returns (employee.UserEntity);
-  rpc BlockEmployee(employee.EmployeeActionInput) returns (employee.UserEntity);
-  rpc UnblockEmployee(employee.EmployeeActionInput) returns (employee.UserEntity);
-  rpc ResetEmployeePassword(employee.ResetEmployeePasswordInput) returns (shared.Empty);
-  rpc DeleteEmployee(employee.EmployeeActionInput) returns (shared.Empty);
+  rpc GetEmployees(GetEmployeesInput) returns (PaginatedEmployeesOutput);
+  rpc GetEmployee(GetEmployeeInput) returns (EmployeeUserEntity);
+  rpc CreateEmployee(CreateEmployeeInput) returns (EmployeeUserEntity);
+  rpc UpdateEmployee(UpdateEmployeeInput) returns (EmployeeUserEntity);
+  rpc ChangeEmployeeRole(ChangeEmployeeRoleInput) returns (EmployeeUserEntity);
+  rpc BlockEmployee(EmployeeActionInput) returns (EmployeeUserEntity);
+  rpc UnblockEmployee(EmployeeActionInput) returns (EmployeeUserEntity);
+  rpc ResetEmployeePassword(ResetEmployeePasswordInput) returns (shared.Empty);
+  rpc DeleteEmployee(EmployeeActionInput) returns (shared.Empty);
 }

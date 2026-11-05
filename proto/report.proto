@@ -3,8 +3,7 @@ syntax = 'proto3';
 package report;
 
 import 'shared/shared.proto';
-import 'user/client.proto';
-import 'user/employee.proto';
+import 'user.proto';
 
 enum ReportStatus {
   IN_PROCESS = 0;
@@ -37,34 +36,34 @@ message ThemePaginationInput {
 }
 
 message GetThemesInput {
-  client.ValidateInput validation = 1;
+  user.ClientValidateInput validation = 1;
   ThemePaginationInput pagination = 2;
 }
 
 message GetThemeInput {
-  client.ValidateInput validation = 1;
+  user.ClientValidateInput validation = 1;
   string id = 2;
 }
 
 message GetThemesAdminInput {
-  employee.ValidateInput validation = 1;
+  user.EmployeeValidateInput validation = 1;
   ThemePaginationInput pagination = 2;
 }
 
 message GetThemeAdminInput {
-  employee.ValidateInput validation = 1;
+  user.EmployeeValidateInput validation = 1;
   string id = 2;
 }
 
 message CreateThemeInput {
-  employee.ValidateInput validation = 1;
+  user.EmployeeValidateInput validation = 1;
   string name = 2;
   optional string description = 3;
   optional string parentId = 4;
 }
 
 message UpdateThemeInput {
-  employee.ValidateInput validation = 1;
+  user.EmployeeValidateInput validation = 1;
   string id = 2;
   optional string name = 3;
   optional string description = 4;
@@ -72,7 +71,7 @@ message UpdateThemeInput {
 }
 
 message ThemeActionInput {
-  employee.ValidateInput validation = 1;
+  user.EmployeeValidateInput validation = 1;
   string id = 2;
 }
 
@@ -126,27 +125,27 @@ message ReportPaginationInput {
 }
 
 message GetMyReportsInput {
-  client.ValidateInput validation = 1;
+  user.ClientValidateInput validation = 1;
   ReportPaginationInput pagination = 2;
 }
 
 message GetMyReportInput {
-  client.ValidateInput validation = 1;
+  user.ClientValidateInput validation = 1;
   string id = 2;
 }
 
 message GetReportsInput {
-  employee.ValidateInput validation = 1;
+  user.EmployeeValidateInput validation = 1;
   ReportPaginationInput pagination = 2;
 }
 
 message GetAdminReportInput {
-  employee.ValidateInput validation = 1;
+  user.EmployeeValidateInput validation = 1;
   string id = 2;
 }
 
 message CreateReportInput {
-  client.ValidateInput validation = 1;
+  user.ClientValidateInput validation = 1;
   string title = 2;
   string content = 3;
   optional string feedbackContact = 4;
@@ -155,7 +154,7 @@ message CreateReportInput {
 }
 
 message UpdateMyReportInput {
-  client.ValidateInput validation = 1;
+  user.ClientValidateInput validation = 1;
   string id = 2;
   optional string title = 3;
   optional string content = 4;
@@ -165,7 +164,7 @@ message UpdateMyReportInput {
 }
 
 message UpdateReportInput {
-  employee.ValidateInput validation = 1;
+  user.EmployeeValidateInput validation = 1;
   string id = 2;
   optional string title = 3;
   optional string content = 4;
@@ -178,24 +177,24 @@ message UpdateReportInput {
 }
 
 message AssignReportInput {
-  employee.ValidateInput validation = 1;
+  user.EmployeeValidateInput validation = 1;
   string id = 2;
   optional string assignedToId = 3;
 }
 
 message ChangeReportStatusInput {
-  employee.ValidateInput validation = 1;
+  user.EmployeeValidateInput validation = 1;
   string id = 2;
   ReportStatus status = 3;
 }
 
 message ReportActionInput {
-  employee.ValidateInput validation = 1;
+  user.EmployeeValidateInput validation = 1;
   string id = 2;
 }
 
 message MyReportActionInput {
-  client.ValidateInput validation = 1;
+  user.ClientValidateInput validation = 1;
   string id = 2;
 }
 
