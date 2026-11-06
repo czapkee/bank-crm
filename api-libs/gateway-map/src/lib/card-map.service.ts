@@ -46,26 +46,35 @@ export class CardGatewayMapService {
     return {
       ...pagination,
       status: pagination.status === undefined ? undefined : CARD_STATUSES_TO_GRPC[pagination.status],
+      dateFrom: pagination.dateFrom === undefined ? undefined : new Date(pagination.dateFrom).toISOString(),
+      dateTo: pagination.dateTo === undefined ? undefined : new Date(pagination.dateTo).toISOString(),
     }
   }
 
   mapCreateCardRequest(dto: CreateCardInput): GrpcCreateCardInput {
     return {
-      ...dto,
+      cardNumber: dto.cardNumber,
+      accountNumber: dto.accountNumber,
+      dateOfExpire: new Date(dto.dateOfExpire).toISOString(),
+      balance: dto.balance,
       status: dto.status === undefined ? undefined : CARD_STATUSES_TO_GRPC[dto.status],
+      userId: dto.userId,
     }
   }
 
   mapUpdateCardRequest(dto: UpdateCardInput): GrpcUpdateCardInput {
     return {
-      ...dto,
-      status: dto.status === undefined ? undefined : CARD_STATUSES_TO_GRPC[dto.status],
+      ...(dto.accountNumber === undefined ? {} : { accountNumber: dto.accountNumber }),
+      ...(dto.dateOfExpire === undefined
+        ? {}
+        : { dateOfExpire: new Date(dto.dateOfExpire).toISOString() }),
+      ...(dto.balance === undefined ? {} : { balance: dto.balance }),
+      ...(dto.status === undefined ? {} : { status: CARD_STATUSES_TO_GRPC[dto.status] }),
     }
   }
 
   mapChangeCardStatusRequest(dto: ChangeCardStatusInput): GrpcChangeCardStatusInput {
     return {
-      ...dto,
       status: CARD_STATUSES_TO_GRPC[dto.status],
     }
   }
@@ -73,7 +82,7 @@ export class CardGatewayMapService {
   mapPaginatedCards(output: GrpcPaginatedCardsOutput): PaginatedCardsOutput {
     return {
       pagination: this.mapCardPagination(output.pagination),
-      cards: output.cards.map((card) => this.mapCard(card)),
+      cards: (output.cards ?? []).map((card) => this.mapCard(card)),
     }
   }
 }

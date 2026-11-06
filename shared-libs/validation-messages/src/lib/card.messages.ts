@@ -5,7 +5,11 @@ export const CARD_MESSAGES = {
   CARD_NOT_FOUND: 'Карта не найдена',
   CARD_ALREADY_BLOCKED: 'Карта уже заблокирована',
   CARD_NOT_BLOCKED: 'Карта не заблокирована',
+  CARD_BLOCKED: 'Карта заблокирована',
+  CARD_NOT_ACTIVE: 'Операция доступна только для активированной карты',
   CARD_EXPIRED: 'Срок действия карты истёк',
+  CARD_NUMBER_EXISTS: 'Карта с таким номером уже существует',
+  ACCOUNT_NUMBER_EXISTS: 'Карта с таким номером счёта уже существует',
   CARD_NUMBER_VALIDATION: {
     NOT_EMPTY: 'Номер карты не может быть пустым',
     TYPE: 'Номер карты должен быть строкой',

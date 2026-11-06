@@ -3,21 +3,21 @@ import { PaginationBaseOutput } from '../shared/pagination.type.js';
 export interface PaymentBaseOutput {
   id: string;
   sum: string;
-  dateAndTime: Date;
+  dateAndTime: string;
   service: string;
   reference: number;
   status: number;
   cardId: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface PaymentPaginationBaseOutput extends PaginationBaseOutput {
   status?: number;
   reference?: number;
   cardId?: string;
-  dateFrom?: Date;
-  dateTo?: Date;
+  dateFrom?: string;
+  dateTo?: string;
 }
 
 export interface PaginatedPaymentsBaseOutput {

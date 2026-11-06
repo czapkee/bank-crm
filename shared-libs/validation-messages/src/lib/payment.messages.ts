@@ -5,6 +5,7 @@ export const PAYMENT_MESSAGES = {
   PAYMENT_NOT_FOUND: 'Платёж не найден',
   INSUFFICIENT_FUNDS: 'Недостаточно средств на карте',
   PAYMENT_DENIED: 'Платёж отклонён',
+  REFERENCE_NOT_ALLOWED: 'Списание недоступно для выбранного типа операции',
   SUM_VALIDATION: {
     NOT_EMPTY: 'Сумма платежа не может быть пустой',
     TYPE: 'Сумма платежа должна быть строкой',

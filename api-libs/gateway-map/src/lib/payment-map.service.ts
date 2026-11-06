@@ -62,19 +62,24 @@ export class PaymentGatewayMapService {
       status: pagination.status === undefined ? undefined : CARD_PAYMENT_STATUSES_TO_GRPC[pagination.status],
       reference:
         pagination.reference === undefined ? undefined : PAYMENT_REFERENCES_TO_GRPC[pagination.reference],
+      dateFrom: pagination.dateFrom === undefined ? undefined : new Date(pagination.dateFrom).toISOString(),
+      dateTo: pagination.dateTo === undefined ? undefined : new Date(pagination.dateTo).toISOString(),
     }
   }
 
   mapWriteOffCardRequest(dto: WriteOffCardInput): GrpcWriteOffCardInput {
     return {
-      ...dto,
+      sum: dto.sum,
+      service: dto.service,
       reference: PAYMENT_REFERENCES_TO_GRPC[dto.reference],
     }
   }
 
   mapCreatePaymentRequest(dto: CreatePaymentInput): GrpcCreatePaymentInput {
     return {
-      ...dto,
+      sum: dto.sum,
+      dateAndTime: new Date(dto.dateAndTime).toISOString(),
+      service: dto.service,
       reference: PAYMENT_REFERENCES_TO_GRPC[dto.reference],
       status: dto.status === undefined ? undefined : CARD_PAYMENT_STATUSES_TO_GRPC[dto.status],
     }
@@ -82,7 +87,6 @@ export class PaymentGatewayMapService {
 
   mapChangePaymentStatusRequest(dto: ChangePaymentStatusInput): GrpcChangePaymentStatusInput {
     return {
-      ...dto,
       status: CARD_PAYMENT_STATUSES_TO_GRPC[dto.status],
     }
   }
@@ -90,7 +94,7 @@ export class PaymentGatewayMapService {
   mapPaginatedPayments(output: GrpcPaginatedPaymentsOutput): PaginatedPaymentsOutput {
     return {
       pagination: this.mapPaymentPagination(output.pagination),
-      payments: output.payments.map((payment) => this.mapPayment(payment)),
+      payments: (output.payments ?? []).map((payment) => this.mapPayment(payment)),
     }
   }
 }

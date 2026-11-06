@@ -34,35 +34,52 @@ export type GrpcChangeEmployeeRoleInput = Omit<ChangeEmployeeRoleInput, 'role'> 
   role: number
 }
 
-export type GrpcCardPaginationInput = Omit<CardPaginationInput, 'status'> & {
+export type GrpcCardPaginationInput = Omit<
+  CardPaginationInput,
+  'status' | 'dateFrom' | 'dateTo'
+> & {
   status?: number
+  dateFrom?: string
+  dateTo?: string
 }
 
-export type GrpcCreateCardInput = Omit<CreateCardInput, 'status'> & {
+export type GrpcCreateCardInput = Omit<CreateCardInput, 'status' | 'dateOfExpire'> & {
   status?: number
+  dateOfExpire: string
 }
 
-export type GrpcUpdateCardInput = Omit<UpdateCardInput, 'status'> & {
+export type GrpcUpdateCardInput = Omit<UpdateCardInput, 'status' | 'dateOfExpire'> & {
   status?: number
+  dateOfExpire?: string
 }
 
 export type GrpcChangeCardStatusInput = Omit<ChangeCardStatusInput, 'status'> & {
   status: number
 }
 
-export type GrpcPaymentPaginationInput = Omit<PaymentPaginationInput, 'status' | 'reference'> & {
+export type GrpcPaymentPaginationInput = Omit<
+  PaymentPaginationInput,
+  'status' | 'reference' | 'dateFrom' | 'dateTo'
+> & {
   status?: number
   reference?: number
+  dateFrom?: string
+  dateTo?: string
 }
 
 export type GrpcWriteOffCardInput = Omit<WriteOffCardInput, 'reference'> & {
   reference: number
 }
 
-export type GrpcCreatePaymentInput = Omit<CreatePaymentInput, 'status' | 'reference'> & {
+export type GrpcCreatePaymentInput = Omit<
+  CreatePaymentInput,
+  'status' | 'reference' | 'dateAndTime'
+> & {
   status?: number
   reference: number
+  dateAndTime: string
 }
+
 
 export type GrpcChangePaymentStatusInput = Omit<ChangePaymentStatusInput, 'status'> & {
   status: number

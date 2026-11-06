@@ -6,22 +6,21 @@
     "tsBuildInfoFile": "dist/tsconfig.lib.tsbuildinfo",
     "emitDeclarationOnly": false,
     "forceConsistentCasingInFileNames": true,
-    "types": [
-      "node"
-    ],
+    "types": ["node"],
     "target": "es2021",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true
   },
-  "include": [
-    "src/**/*.ts"
-  ],
+  "include": ["src/**/*.ts"],
   "references": [
     {
-      "path": "../../shared-libs/grpc-types/tsconfig.lib.json"
+      "path": "../card-database/tsconfig.lib.json"
     },
     {
       "path": "../card-utils/tsconfig.lib.json"
+    },
+    {
+      "path": "../../shared-libs/grpc-types/tsconfig.lib.json"
     }
   ]
 }

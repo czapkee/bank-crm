@@ -3,8 +3,8 @@ import { PaginationBaseInput } from '../shared/pagination.type.js';
 export interface CardPaginationBaseInput extends PaginationBaseInput {
   status?: number;
   userId?: string;
-  dateFrom?: Date;
-  dateTo?: Date;
+  dateFrom?: Date | string;
+  dateTo?: Date | string;
 }
 
 export interface GetMyCardsBaseInput {
@@ -31,7 +31,7 @@ export interface GetUserCardsBaseInput {
 export interface CreateCardBaseInput {
   cardNumber: string;
   accountNumber: string;
-  dateOfExpire: Date;
+  dateOfExpire: Date | string;
   balance: string;
   status?: number;
   userId: string;
@@ -40,7 +40,7 @@ export interface CreateCardBaseInput {
 export interface UpdateCardBaseInput {
   id: string;
   accountNumber?: string;
-  dateOfExpire?: Date;
+  dateOfExpire?: Date | string;
   balance?: string;
   status?: number;
 }

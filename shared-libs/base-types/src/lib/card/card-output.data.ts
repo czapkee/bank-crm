@@ -4,19 +4,19 @@ export interface CardBaseOutput {
   id: string;
   cardNumber: string;
   accountNumber: string;
-  dateOfExpire: Date;
+  dateOfExpire: string;
   balance: string;
   status: number;
   userId: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface CardPaginationBaseOutput extends PaginationBaseOutput {
   status?: number;
   userId?: string;
-  dateFrom?: Date;
-  dateTo?: Date;
+  dateFrom?: string;
+  dateTo?: string;
 }
 
 export interface PaginatedCardsBaseOutput {

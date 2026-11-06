@@ -7,6 +7,7 @@ export type {
   Payment,
   UserSnapshot
 } from './generated/prisma/client'
+export { Prisma } from './generated/prisma/client'
 export {
   CardPaymentStatus,
   CardStatuses,

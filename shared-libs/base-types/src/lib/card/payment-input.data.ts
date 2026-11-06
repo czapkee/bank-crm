@@ -4,8 +4,8 @@ export interface PaymentPaginationBaseInput extends PaginationBaseInput {
   status?: number;
   reference?: number;
   cardId?: string;
-  dateFrom?: Date;
-  dateTo?: Date;
+  dateFrom?: Date | string;
+  dateTo?: Date | string;
 }
 
 export interface WriteOffCardBaseInput {
@@ -40,7 +40,7 @@ export interface GetCardPaymentsBaseInput {
 export interface CreatePaymentBaseInput {
   cardId: string;
   sum: string;
-  dateAndTime: Date;
+  dateAndTime: Date | string;
   service: string;
   reference: number;
   status?: number;

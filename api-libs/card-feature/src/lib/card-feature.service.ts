@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common'
+import { CardAuthUtil, CardDatabaseUtil, CardMapUtil, CardValidateUtil } from '@org/card-utils'
 
 import type {
   CardOutput,
@@ -10,11 +11,25 @@ import type {
 
 @Injectable()
 export class CardFeatureService implements CardServiceContract {
-  async GetMyCards(_data: GetMyCardsInput): Promise<PaginatedCardsOutput> {
-    throw new Error('Method not implemented')
+  constructor(
+    private readonly db: CardDatabaseUtil,
+    private readonly auth: CardAuthUtil,
+    private readonly validate: CardValidateUtil,
+    private readonly map: CardMapUtil,
+  ) {}
+
+  async GetMyCards(data: GetMyCardsInput): Promise<PaginatedCardsOutput> {
+    const payload = this.auth.validateClientAccess(data.validation.accessToken)
+    const pagination = this.validate.validateCardPagination(data.pagination)
+    const result = await this.db.getCards({ ...pagination, userId: payload.id })
+
+    return this.map.mapCardList(result)
   }
 
-  async GetMyCard(_data: GetMyCardInput): Promise<CardOutput> {
-    throw new Error('Method not implemented')
+  async GetMyCard(data: GetMyCardInput): Promise<CardOutput> {
+    const payload = this.auth.validateClientAccess(data.validation.accessToken)
+    const card = await this.validate.validateOwnedCard(data.id, payload.id)
+
+    return this.map.mapCard(card)
   }
 }

@@ -26,6 +26,7 @@ model Card {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@index([status])
+  @@index([userId])
   @@map("cards")
 }
 
