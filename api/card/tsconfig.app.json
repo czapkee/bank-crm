@@ -16,16 +16,16 @@
       "path": "../../api-libs/nest-launcher/tsconfig.lib.json"
     },
     {
-      "path": "../../server-libs/payment-feature/tsconfig.lib.json"
+      "path": "../../api-libs/payment-feature/tsconfig.lib.json"
     },
     {
-      "path": "../../server-libs/payment-admin-feature/tsconfig.lib.json"
+      "path": "../../api-libs/payment-admin-feature/tsconfig.lib.json"
     },
     {
-      "path": "../../server-libs/card-feature/tsconfig.lib.json"
+      "path": "../../api-libs/card-feature/tsconfig.lib.json"
     },
     {
-      "path": "../../server-libs/card-admin-feature/tsconfig.lib.json"
+      "path": "../../api-libs/card-admin-feature/tsconfig.lib.json"
     }
   ]
 }

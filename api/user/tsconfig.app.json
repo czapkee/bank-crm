@@ -16,16 +16,16 @@
       "path": "../../api-libs/nest-launcher/tsconfig.lib.json"
     },
     {
-      "path": "../../server-libs/user-employee-feature/tsconfig.lib.json"
+      "path": "../../api-libs/user-employee-feature/tsconfig.lib.json"
     },
     {
-      "path": "../../server-libs/user-employee-admin-feature/tsconfig.lib.json"
+      "path": "../../api-libs/user-employee-admin-feature/tsconfig.lib.json"
     },
     {
-      "path": "../../server-libs/user-client-feature/tsconfig.lib.json"
+      "path": "../../api-libs/user-client-feature/tsconfig.lib.json"
     },
     {
-      "path": "../../server-libs/user-client-admin-feature/tsconfig.lib.json"
+      "path": "../../api-libs/user-client-admin-feature/tsconfig.lib.json"
     }
   ]
 }

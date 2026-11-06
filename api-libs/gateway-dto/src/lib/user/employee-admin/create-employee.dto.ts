@@ -1,0 +1,49 @@
+import { Email } from '../../decorators/shared/email.decorator.js'
+import { Name } from '../../decorators/shared/name.decorator.js'
+import { Phone } from '../../decorators/shared/phone.decorator.js'
+import { Address } from '../../decorators/user/address.decorator.js'
+import { CodeWord } from '../../decorators/user/code-word.decorator.js'
+import { FatherName } from '../../decorators/user/father-name.decorator.js'
+import { IdentifCode } from '../../decorators/user/identif-code.decorator.js'
+import { IsResident } from '../../decorators/user/is-resident.decorator.js'
+import { NumPass } from '../../decorators/user/num-pass.decorator.js'
+import { Role } from '../../decorators/user/role.decorator.js'
+import { Surname } from '../../decorators/user/surname.decorator.js'
+
+import type { Roles } from '@org/enums'
+import type { CreateEmployeeInput } from '@org/shared-types'
+
+export class CreateEmployeeDto implements CreateEmployeeInput {
+  @Email()
+  email: string
+
+  @Name()
+  name: string
+
+  @Surname()
+  surname: string
+
+  @FatherName()
+  fatherName?: string
+
+  @Phone()
+  phoneNumber: string
+
+  @IsResident()
+  isResident: boolean
+
+  @IdentifCode()
+  identifCode: string
+
+  @NumPass()
+  numPass: string
+
+  @CodeWord()
+  codeWord: string
+
+  @Address()
+  address: string
+
+  @Role()
+  role: Roles
+}

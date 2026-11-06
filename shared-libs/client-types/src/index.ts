@@ -1,4 +1,5 @@
 export * from './lib/shared/replace.type.js';
+export * from './lib/user/auth/auth-token.data.js';
 export * from './lib/user/client/client-input.data.js';
 export * from './lib/user/client/client-output.data.js';
 export * from './lib/user/employee/client-input.data.js';

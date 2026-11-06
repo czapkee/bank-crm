@@ -8,8 +8,8 @@ export interface EmployeeUserBasePayload {
 export interface EmployeeUserBaseEntity {
   id: string;
   email: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
   role: number;
   name: string;
   surname: string;

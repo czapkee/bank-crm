@@ -1,0 +1,9 @@
+ALTER TABLE "users" ALTER COLUMN "name" DROP NOT NULL,
+ALTER COLUMN "surname" DROP NOT NULL,
+ALTER COLUMN "phone_number" DROP NOT NULL,
+ALTER COLUMN "identif_code" DROP NOT NULL,
+ALTER COLUMN "num_pass" DROP NOT NULL,
+ALTER COLUMN "code_word" DROP NOT NULL,
+ALTER COLUMN "address" DROP NOT NULL;
+
+ALTER TABLE "auth_employers" ADD COLUMN "registration_expires_at" TIMESTAMP(3);

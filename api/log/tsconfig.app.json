@@ -16,7 +16,7 @@
       "path": "../../api-libs/nest-launcher/tsconfig.lib.json"
     },
     {
-      "path": "../../server-libs/log-feature/tsconfig.lib.json"
+      "path": "../../api-libs/log-feature/tsconfig.lib.json"
     }
   ]
 }

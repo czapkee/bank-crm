@@ -1,6 +1,7 @@
 export * from './lib/shared/pagination.type.js';
 export * from './lib/user/auth/auth-input.data.js';
 export * from './lib/user/auth/auth-output.data.js';
+export * from './lib/user/auth/auth-token.data.js';
 export * from './lib/user/client/client-output.data.js';
 export * from './lib/user/employee/client-input.data.js';
 export * from './lib/user/employee/employee-input.data.js';

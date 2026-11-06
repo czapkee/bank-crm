@@ -4,13 +4,15 @@ import { Replace } from '../../shared/replace.type.js';
 
 import type {
   AuthBaseOutput,
+  AuthResponseBase,
   EmployeePaginationBaseOutput,
   EmployeeUserBaseEntity,
   EmployeeUserBasePayload,
   PaginatedEmployeesBaseOutput,
 } from '@org/base-types';
 
-export type EmployeeAuthOutput = AuthBaseOutput
+export type EmployeeAuthOutput = AuthBaseOutput;
+export type EmployeeAuthResponse = AuthResponseBase;
 export type EmployeeUserPayload = Replace<
   EmployeeUserBasePayload,
   { role: Roles }

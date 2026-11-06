@@ -1,0 +1,38 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "tsBuildInfoFile": "dist/tsconfig.lib.tsbuildinfo",
+    "emitDeclarationOnly": false,
+    "forceConsistentCasingInFileNames": true,
+    "types": ["node"],
+    "target": "es2021",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  },
+  "include": ["src/**/*.ts"],
+  "references": [
+    {
+      "path": "../shared-utils/tsconfig.lib.json"
+    },
+    {
+      "path": "../../shared-libs/validation-messages/tsconfig.lib.json"
+    },
+    {
+      "path": "../../shared-libs/validation-config/tsconfig.lib.json"
+    },
+    {
+      "path": "../user-database/tsconfig.lib.json"
+    },
+    {
+      "path": "../../shared-libs/grpc-types/tsconfig.lib.json"
+    },
+    {
+      "path": "../../shared-libs/enums/tsconfig.lib.json"
+    },
+    {
+      "path": "../../shared-libs/base-types/tsconfig.lib.json"
+    }
+  ]
+}

@@ -16,13 +16,13 @@
       "path": "../../api-libs/nest-launcher/tsconfig.lib.json"
     },
     {
-      "path": "../../server-libs/gateway-map/tsconfig.lib.json"
+      "path": "../../api-libs/gateway-map/tsconfig.lib.json"
     },
     {
-      "path": "../../server-libs/gateway-controllers/tsconfig.lib.json"
+      "path": "../../api-libs/gateway-controllers/tsconfig.lib.json"
     },
     {
-      "path": "../../server-libs/gateway-authorization/tsconfig.lib.json"
+      "path": "../../api-libs/gateway-authorization/tsconfig.lib.json"
     }
   ]
 }

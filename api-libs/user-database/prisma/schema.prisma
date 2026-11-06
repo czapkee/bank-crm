@@ -11,16 +11,16 @@ datasource db {
 model User {
   id String @id @default(uuid(7))
 
-  name        String
-  surname     String
+  name        String?
+  surname     String?
   fatherName  String? @map("father_name")
-  phoneNumber String  @unique @map("phone_number")
+  phoneNumber String? @unique @map("phone_number")
 
   isResident   Boolean @default(true) @map("is_resident")
-  identtifCode String  @unique @map("identif_code") @db.VarChar(14)
-  numPass      String  @unique @map("num_pass") @db.VarChar(9)
-  codeWord     String  @map("code_word")
-  address      String
+  identtifCode String? @unique @map("identif_code") @db.VarChar(14)
+  numPass      String? @unique @map("num_pass") @db.VarChar(9)
+  codeWord     String? @map("code_word")
+  address      String?
 
   clientId String?     @unique @map("client_id")
   client   AuthClient?
@@ -65,6 +65,8 @@ model AuthEmployee {
   user   User   @relation(fields: [userId], references: [id])
 
   role Roles @default(EMPLOYEE)
+
+  registrationExpiresAt DateTime? @map("registration_expires_at")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")

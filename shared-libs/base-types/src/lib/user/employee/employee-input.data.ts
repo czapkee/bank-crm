@@ -15,8 +15,6 @@ export interface GetEmployeeBaseInput {
 
 export interface CreateEmployeeBaseInput {
   email: string;
-  password: string;
-  confirmationPassword: string;
   name: string;
   surname: string;
   fatherName?: string;

@@ -251,8 +251,6 @@ message GetEmployeeInput {
 message CreateEmployeeInput {
   EmployeeValidateInput validation = 1;
   string email = 2;
-  string password = 3;
-  string confirmationPassword = 4;
   string name = 5;
   string surname = 6;
   optional string fatherName = 7;

@@ -3,6 +3,9 @@ import { USER_CONFIG } from '@org/validation-config'
 export const USER_MESSAGES = {
   CLIENT_NOT_FOUND: 'Клиент не найден',
   EMPLOYEE_NOT_FOUND: 'Сотрудник не найден',
+  PHONE_NUMBER_EXISTS: 'Пользователь с таким номером телефона уже существует',
+  IDENTIF_CODE_EXISTS: 'Пользователь с таким идентификационным кодом уже существует',
+  NUM_PASS_EXISTS: 'Пользователь с таким номером паспорта уже существует',
   CLIENT_ALREADY_BLOCKED: 'Клиент уже заблокирован',
   CLIENT_NOT_BLOCKED: 'Клиент не заблокирован',
   EMPLOYEE_ALREADY_BLOCKED: 'Сотрудник уже заблокирован',

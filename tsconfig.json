@@ -64,73 +64,73 @@
       "path": "./shared-libs/shared-types"
     },
     {
-      "path": "./server-libs/shared-utils"
+      "path": "./api-libs/shared-utils"
     },
     {
-      "path": "./server-libs/user-utils"
+      "path": "./api-libs/user-utils"
     },
     {
-      "path": "./server-libs/card-utils"
+      "path": "./api-libs/card-utils"
     },
     {
-      "path": "./server-libs/log-utils"
+      "path": "./api-libs/log-utils"
     },
     {
-      "path": "./server-libs/report-utils"
+      "path": "./api-libs/report-utils"
     },
     {
-      "path": "./server-libs/user-client-feature"
+      "path": "./api-libs/user-client-feature"
     },
     {
-      "path": "./server-libs/user-employee-feature"
+      "path": "./api-libs/user-employee-feature"
     },
     {
-      "path": "./server-libs/user-client-admin-feature"
+      "path": "./api-libs/user-client-admin-feature"
     },
     {
-      "path": "./server-libs/user-employee-admin-feature"
+      "path": "./api-libs/user-employee-admin-feature"
     },
     {
-      "path": "./server-libs/card-feature"
+      "path": "./api-libs/card-feature"
     },
     {
-      "path": "./server-libs/card-admin-feature"
+      "path": "./api-libs/card-admin-feature"
     },
     {
-      "path": "./server-libs/payment-feature"
+      "path": "./api-libs/payment-feature"
     },
     {
-      "path": "./server-libs/payment-admin-feature"
+      "path": "./api-libs/payment-admin-feature"
     },
     {
-      "path": "./server-libs/log-feature"
+      "path": "./api-libs/log-feature"
     },
     {
-      "path": "./server-libs/report-feature"
+      "path": "./api-libs/report-feature"
     },
     {
-      "path": "./server-libs/report-admin-feature"
+      "path": "./api-libs/report-admin-feature"
     },
     {
-      "path": "./server-libs/theme-feature"
+      "path": "./api-libs/theme-feature"
     },
     {
-      "path": "./server-libs/theme-admin-feature"
+      "path": "./api-libs/theme-admin-feature"
     },
     {
-      "path": "./server-libs/gateway-authorization"
+      "path": "./api-libs/gateway-authorization"
     },
     {
-      "path": "./server-libs/gateway-decorators"
+      "path": "./api-libs/gateway-decorators"
     },
     {
-      "path": "./server-libs/gateway-dto"
+      "path": "./api-libs/gateway-dto"
     },
     {
-      "path": "./server-libs/gateway-map"
+      "path": "./api-libs/gateway-map"
     },
     {
-      "path": "./server-libs/gateway-controllers"
+      "path": "./api-libs/gateway-controllers"
     }
   ],
   "compilerOptions": {}

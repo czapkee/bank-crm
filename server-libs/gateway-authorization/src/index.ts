@@ -1,5 +1,0 @@
-export * from './lib/constants/roles.constants.js'
-export * from './lib/gateway-authorization.module.js'
-export * from './lib/guards/auth-jwt.guard.js'
-export * from './lib/guards/roles.guard.js'
-export * from './lib/strategies/jwt.strategy.js'

@@ -14,6 +14,10 @@ export const AUTH_MESSAGES = {
   TOKEN_INVALID: 'Недействительный токен',
   TOKEN_NOT_FOUND: 'Токен не найден',
   TOKEN_EXPIRED: 'Срок действия токена истёк',
+  TOKEN_TYPE_INVALID: 'Недействительный тип токена',
+  EMPLOYEE_REGISTRATION_EXPIRED: 'Срок регистрации сотрудника истёк',
+  EMPLOYEE_ALREADY_REGISTERED: 'Сотрудник уже зарегистрирован',
+  EMPLOYEE_NOT_REGISTERED: 'Сотрудник ещё не завершил регистрацию',
   SESSION_NOT_FOUND: 'Сессия не найдена',
   INVALID_SESSION: 'Недействительная сессия',
   PASSWORD_VALIDATION: {

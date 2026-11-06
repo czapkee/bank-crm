@@ -7,8 +7,8 @@ export interface ClientUserBasePayload {
 export interface ClientUserBaseEntity {
   id: string;
   email: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
   name: string;
   surname: string;
   fatherName: string | null;
