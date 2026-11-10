@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { LogPublisher } from '@org/rmq-config'
+import { LogPublisher, UserSyncPublisher } from '@org/rmq-config'
 import { USER_LOG_ACTIONS } from '@org/rmq-messages'
 import { UserDatabaseUtil, UserMapUtil, UserPasswordUtil, UserValidateUtil } from '@org/user-utils'
 
@@ -24,6 +24,7 @@ export class UserClientAdminFeatureService implements ClientAdminServiceContract
     private readonly password: UserPasswordUtil,
     private readonly map: UserMapUtil,
     private readonly log: LogPublisher,
+    private readonly sync: UserSyncPublisher,
   ) {}
 
   async GetClients(data: GetClientsInput): Promise<PaginatedClientsOutput> {
@@ -51,6 +52,8 @@ export class UserClientAdminFeatureService implements ClientAdminServiceContract
     const passwordHash = await this.password.hashPassword(data.password)
     const auth = await this.db.createClientWithProfile(data, passwordHash)
 
+    this.sync.publish({ action: 'upsert', userId: auth.user.id })
+
     this.log.publish({
       service: 'user',
       entity: 'Client',
@@ -69,6 +72,8 @@ export class UserClientAdminFeatureService implements ClientAdminServiceContract
     await this.validate.validateClientEmailAvailable(data.email ?? existing.email, existing.email)
     await this.validate.validateProfileUnique(data, data.id)
     const auth = await this.db.updateClientProfileByAdmin(data.id, data)
+
+    this.sync.publish({ action: 'upsert', userId: data.id })
 
     this.log.publish({
       service: 'user',
@@ -141,6 +146,8 @@ export class UserClientAdminFeatureService implements ClientAdminServiceContract
     const actor = await this.validate.validateEmployeeAccess(data.validation.accessToken)
     await this.validate.validateClientExists(data.id)
     await this.db.deleteClient(data.id)
+
+    this.sync.publish({ action: 'delete', userId: data.id })
 
     this.log.publish({
       service: 'user',

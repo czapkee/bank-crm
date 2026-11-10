@@ -176,6 +176,18 @@ export class CardDatabaseUtil {
     return this.db.card.findUnique({ where: { id } })
   }
 
+  syncUserSnapshot(userId: string): Promise<unknown> {
+    return this.db.userSnapshot.upsert({
+      where: { userId },
+      create: { userId },
+      update: {},
+    })
+  }
+
+  deleteUserSnapshot(userId: string): Promise<unknown> {
+    return this.db.userSnapshot.deleteMany({ where: { userId } })
+  }
+
   findCardByOwner(id: string, userId: string): Promise<Card | null> {
     return this.db.card.findFirst({ where: { id, userId } })
   }
@@ -209,11 +221,7 @@ export class CardDatabaseUtil {
   }
 
   async createCard(data: CreateCardData): Promise<Card> {
-    await this.db.userSnapshot.upsert({
-      where: { userId: data.userId },
-      create: { userId: data.userId },
-      update: {},
-    })
+    await this.syncUserSnapshot(data.userId)
 
     return this.db.card.create({
       data: {

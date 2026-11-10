@@ -42,11 +42,22 @@ export async function microservice<T>(
     },
   });
   if (options.rabbitMQ) {
+    const rabbitMQ =
+      typeof options.rabbitMQ === 'object'
+        ? options.rabbitMQ
+        : { queue: APP_LOCAL_NAME };
     app.connectMicroservice<MicroserviceOptions>({
       transport: Transport.RMQ,
       options: {
         urls: [`amqp://${env.RMQ_USER}:${env.RMQ_PASSWORD}@${env.RMQ_URL}`],
-        queue: APP_LOCAL_NAME,
+        queue: rabbitMQ.queue,
+        ...(rabbitMQ.exchange
+          ? {
+              exchange: rabbitMQ.exchange,
+              routingKey: rabbitMQ.routingKey ?? '',
+              exchangeType: rabbitMQ.exchangeType ?? 'fanout',
+            }
+          : {}),
         queueOptions: {
           durable: true,
         },

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { LogPublisher } from '@org/rmq-config'
+import { LogPublisher, UserSyncPublisher } from '@org/rmq-config'
 import { USER_LOG_ACTIONS } from '@org/rmq-messages'
 import { UserDatabaseUtil, UserMapUtil, UserPasswordUtil, UserTokenUtil, UserValidateUtil } from '@org/user-utils'
 
@@ -27,6 +27,7 @@ export class UserClientFeatureService implements ClientServiceContract {
     private readonly token: UserTokenUtil,
     private readonly map: UserMapUtil,
     private readonly log: LogPublisher,
+    private readonly sync: UserSyncPublisher,
   ) {}
 
   async Register(data: ClientRegisterInput): Promise<ClientAuthOutput> {
@@ -34,6 +35,8 @@ export class UserClientFeatureService implements ClientServiceContract {
     await this.validate.validateClientEmailAvailable(data.email)
     const passwordHash = await this.password.hashPassword(data.password)
     const auth = await this.db.createClient(data.email, passwordHash)
+
+    this.sync.publish({ action: 'upsert', userId: auth.user.id })
 
     this.log.publish({
       service: 'user',
@@ -85,6 +88,8 @@ export class UserClientFeatureService implements ClientServiceContract {
     await this.validate.validateProfileUnique(data, auth.user.id)
     const updated = await this.db.updateClientProfile(auth.user.id, data)
 
+    this.sync.publish({ action: 'upsert', userId: auth.user.id })
+
     this.log.publish({
       service: 'user',
       entity: 'Client',
@@ -119,6 +124,8 @@ export class UserClientFeatureService implements ClientServiceContract {
     const auth = await this.validate.validateClientAccess(data.validation.accessToken)
     await this.validate.validatePassword(auth.passwordHash, data.password)
     await this.db.deleteClient(auth.user.id)
+
+    this.sync.publish({ action: 'delete', userId: auth.user.id })
 
     this.log.publish({
       service: 'user',

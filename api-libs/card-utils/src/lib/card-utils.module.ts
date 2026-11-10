@@ -4,6 +4,7 @@ import { JwtModule } from '@nestjs/jwt'
 import { OrgCardDatabaseModule } from '@org/card-database'
 import { SharedUtilsModule } from '@org/shared-utils'
 
+import { CardUserSyncController } from './controllers/user-sync.controller.js'
 import { CardAuthUtil } from './utils/auth.util.js'
 import { CardDatabaseUtil } from './utils/database.util.js'
 import { CardMapUtil } from './utils/map.util.js'
@@ -35,7 +36,7 @@ const UTILS = [CardAuthUtil, CardDatabaseUtil, CardMapUtil, CardValidateUtil]
       }),
     }),
   ],
-  controllers: [],
+  controllers: [CardUserSyncController],
   providers: [...UTILS],
   exports: [...UTILS],
 })

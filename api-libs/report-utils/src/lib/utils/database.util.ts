@@ -165,7 +165,7 @@ export class ReportDatabaseUtil {
   }
 
   async createReport(data: CreateReportData): Promise<Report> {
-    await this.upsertUserSnapshot(data.userId)
+    await this.syncUserSnapshot(data.userId)
 
     return this.db.report.create({
       data: {
@@ -181,7 +181,7 @@ export class ReportDatabaseUtil {
 
   async updateReport(id: string, data: UpdateReportData): Promise<Report> {
     if (typeof data.assignedToId === 'string') {
-      await this.upsertUserSnapshot(data.assignedToId)
+      await this.syncUserSnapshot(data.assignedToId)
     }
 
     return this.db.report.update({
@@ -293,12 +293,16 @@ export class ReportDatabaseUtil {
     await this.db.theme.delete({ where: { id } })
   }
 
-  private upsertUserSnapshot(userId: string): Promise<unknown> {
+  syncUserSnapshot(userId: string): Promise<unknown> {
     return this.db.userSnapshot.upsert({
       where: { userId },
       create: { userId },
       update: {},
     })
+  }
+
+  deleteUserSnapshot(userId: string): Promise<unknown> {
+    return this.db.userSnapshot.deleteMany({ where: { userId } })
   }
 
   private buildReportWhere(data: ReportPaginationData): ReportWhereInput {

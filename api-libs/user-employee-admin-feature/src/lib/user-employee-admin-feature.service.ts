@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { LogPublisher } from '@org/rmq-config'
+import { LogPublisher, UserSyncPublisher } from '@org/rmq-config'
 import { USER_LOG_ACTIONS } from '@org/rmq-messages'
 import { UserDatabaseUtil, UserMapUtil, UserPasswordUtil, UserValidateUtil } from '@org/user-utils'
 
@@ -25,6 +25,7 @@ export class UserEmployeeAdminFeatureService implements EmployeeAdminServiceCont
     private readonly password: UserPasswordUtil,
     private readonly map: UserMapUtil,
     private readonly log: LogPublisher,
+    private readonly sync: UserSyncPublisher,
   ) {}
 
   async GetEmployees(data: GetEmployeesInput): Promise<PaginatedEmployeesOutput> {
@@ -50,6 +51,8 @@ export class UserEmployeeAdminFeatureService implements EmployeeAdminServiceCont
     await this.validate.validateProfileUnique(data)
     const auth = await this.db.createEmployeeWithProfile(data)
 
+    this.sync.publish({ action: 'upsert', userId: auth.user.id })
+
     this.log.publish({
       service: 'user',
       entity: 'Employee',
@@ -68,6 +71,8 @@ export class UserEmployeeAdminFeatureService implements EmployeeAdminServiceCont
     await this.validate.validateEmployeeEmailAvailable(data.email ?? existing.email, existing.email)
     await this.validate.validateProfileUnique(data, data.id)
     const auth = await this.db.updateEmployeeProfileByAdmin(data.id, data)
+
+    this.sync.publish({ action: 'upsert', userId: data.id })
 
     this.log.publish({
       service: 'user',
@@ -157,6 +162,8 @@ export class UserEmployeeAdminFeatureService implements EmployeeAdminServiceCont
     const actor = await this.validate.validateEmployeeAccess(data.validation.accessToken)
     await this.validate.validateEmployeeExists(data.id)
     await this.db.deleteEmployee(data.id)
+
+    this.sync.publish({ action: 'delete', userId: data.id })
 
     this.log.publish({
       service: 'user',

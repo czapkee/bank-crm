@@ -4,6 +4,7 @@ import { JwtModule } from '@nestjs/jwt'
 import { OrgReportDatabaseModule } from '@org/report-database'
 import { SharedUtilsModule } from '@org/shared-utils'
 
+import { ReportUserSyncController } from './controllers/user-sync.controller.js'
 import { ReportAuthUtil } from './utils/auth.util.js'
 import { ReportDatabaseUtil } from './utils/database.util.js'
 import { ReportMapUtil } from './utils/map.util.js'
@@ -35,7 +36,7 @@ const UTILS = [ReportAuthUtil, ReportDatabaseUtil, ReportMapUtil, ReportValidate
       }),
     }),
   ],
-  controllers: [],
+  controllers: [ReportUserSyncController],
   providers: [...UTILS],
   exports: [...UTILS],
 })

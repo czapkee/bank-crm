@@ -13,6 +13,9 @@
   "exclude": ["eslint.config.js", "eslint.config.cjs", "eslint.config.mjs"],
   "references": [
     {
+      "path": "../../shared-libs/rmq-messages/tsconfig.lib.json"
+    },
+    {
       "path": "../../api-libs/theme-feature/tsconfig.lib.json"
     },
     {
