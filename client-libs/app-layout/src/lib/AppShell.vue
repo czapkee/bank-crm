@@ -34,26 +34,28 @@ const mobileOpen = ref(false)
       </div>
     </Transition>
 
-    <div class="lg:pl-[224px]">
+    <div class="min-w-0 lg:pl-[224px]">
       <header class="sticky top-0 z-20 border-b border-line bg-paper/90 backdrop-blur">
-        <div class="flex h-13 items-center justify-between gap-4 px-5 sm:px-8">
-          <div class="flex items-center gap-3">
+        <div class="flex h-13 items-center justify-between gap-3 px-5 sm:gap-4 sm:px-8">
+          <div class="flex min-w-0 items-center gap-3">
             <button
               type="button"
-              class="flex size-8 items-center justify-center rounded-[4px] border border-line text-ink lg:hidden"
+              class="flex size-8 shrink-0 items-center justify-center rounded-[4px] border border-line text-ink lg:hidden"
               aria-label="Открыть меню"
               @click="mobileOpen = true"
             >
               <AppIcon name="menu" :size="17" />
             </button>
-            <p class="text-[10px] font-medium uppercase tracking-[0.18em] text-muted">
-              Банк / CRM
-              <span class="mx-1.5 text-line">/</span>
+            <p class="min-w-0 truncate text-[10px] font-medium uppercase tracking-[0.18em] text-muted">
+              <span class="hidden sm:inline">
+                Банк / CRM
+                <span class="mx-1.5 text-line">/</span>
+              </span>
               {{ variant === 'admin' ? 'рабочее место' : 'личный кабинет' }}
             </p>
           </div>
 
-          <div class="flex items-center gap-4">
+          <div class="flex shrink-0 items-center gap-3 sm:gap-4">
             <p class="hidden text-[11px] text-muted sm:block">{{ todayLabel() }}</p>
             <span class="hidden h-4 w-px bg-line sm:block" />
             <div class="flex items-center gap-2">

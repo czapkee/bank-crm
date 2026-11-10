@@ -5,7 +5,7 @@ withDefaults(defineProps<{ title?: string; description?: string; padded?: boolea
 </script>
 
 <template>
-  <section class="border border-line bg-surface">
+  <section class="min-w-0 border border-line bg-surface">
     <header
       v-if="title || $slots.actions"
       class="flex flex-wrap items-center justify-between gap-3 border-b border-line px-4 py-3"

@@ -35,18 +35,18 @@ onMounted(() => store.fetchStats())
 </script>
 
 <template>
-  <div class="space-y-8">
+  <div class="min-w-0 space-y-8">
     <PageHeader
       eyebrow="рабочее место"
       title="Обзор"
       description="Сводка по клиентам, картам, платежам и обращениям. Данные обновляются по запросу."
     />
 
-    <section class="grid grid-cols-2 gap-y-6 border-y border-line py-6 sm:grid-cols-3 lg:grid-cols-5">
+    <section class="grid grid-cols-1 gap-x-4 gap-y-6 border-y border-line py-6 sm:grid-cols-2 lg:grid-cols-5">
       <div
         v-for="(item, index) in statCards"
         :key="item.label"
-        :class="['px-4 first:pl-0', index > 0 ? 'border-l border-line' : '']"
+        :class="['min-w-0 px-1 sm:px-4', index > 0 ? 'lg:border-l lg:border-line' : '']"
       >
         <p class="text-[9px] font-medium uppercase tracking-[0.16em] text-muted">{{ item.label }}</p>
         <p class="mt-2 text-[30px] font-semibold leading-none tracking-[-0.03em] tabular-nums text-ink">
@@ -57,7 +57,7 @@ onMounted(() => store.fetchStats())
     </section>
 
     <div class="grid gap-8 xl:grid-cols-[minmax(0,1.6fr)_minmax(280px,0.8fr)]">
-      <Panel title="Последние карты" description="Портфель карт, выпущенных в системе.">
+      <Panel class="min-w-0" title="Последние карты" description="Портфель карт, выпущенных в системе.">
         <template #actions>
           <RouterLink to="/admin/cards" class="text-[11px] text-muted underline decoration-line underline-offset-4 hover:text-ink">
             все карты
@@ -88,7 +88,7 @@ onMounted(() => store.fetchStats())
         </DataTable>
       </Panel>
 
-      <aside class="space-y-6">
+      <aside class="min-w-0 space-y-6">
         <section class="border border-line bg-[#f9e8e6] p-5">
           <p class="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink/45">рабочий день</p>
           <h2 class="mt-2 text-[17px] font-semibold leading-snug tracking-[-0.02em] text-ink">
