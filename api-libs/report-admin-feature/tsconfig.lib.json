@@ -6,22 +6,24 @@
     "tsBuildInfoFile": "dist/tsconfig.lib.tsbuildinfo",
     "emitDeclarationOnly": false,
     "forceConsistentCasingInFileNames": true,
-    "types": [
-      "node"
-    ],
+    "types": ["node"],
     "target": "es2021",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true
   },
-  "include": [
-    "src/**/*.ts"
-  ],
+  "include": ["src/**/*.ts"],
   "references": [
     {
-      "path": "../../shared-libs/grpc-types/tsconfig.lib.json"
+      "path": "../../shared-libs/validation-messages/tsconfig.lib.json"
     },
     {
       "path": "../report-utils/tsconfig.lib.json"
+    },
+    {
+      "path": "../report-database/tsconfig.lib.json"
+    },
+    {
+      "path": "../../shared-libs/grpc-types/tsconfig.lib.json"
     }
   ]
 }

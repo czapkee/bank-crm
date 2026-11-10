@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common'
+import { ReportAuthUtil, ReportDatabaseUtil, ReportMapUtil, ReportValidateUtil } from '@org/report-utils'
 
 import type {
   GetThemeInput,
@@ -10,11 +11,25 @@ import type {
 
 @Injectable()
 export class ThemeFeatureService implements ThemeServiceContract {
-  async GetThemes(_data: GetThemesInput): Promise<PaginatedThemesOutput> {
-    throw new Error('Method not implemented')
+  constructor(
+    private readonly db: ReportDatabaseUtil,
+    private readonly auth: ReportAuthUtil,
+    private readonly validate: ReportValidateUtil,
+    private readonly map: ReportMapUtil,
+  ) {}
+
+  async GetThemes(data: GetThemesInput): Promise<PaginatedThemesOutput> {
+    this.auth.validateClientAccess(data.validation.accessToken)
+    const pagination = this.validate.validateThemePagination(data.pagination)
+    const result = await this.db.getThemes(pagination)
+
+    return this.map.mapThemeListResult(result)
   }
 
-  async GetTheme(_data: GetThemeInput): Promise<ThemeDetailedOutput> {
-    throw new Error('Method not implemented')
+  async GetTheme(data: GetThemeInput): Promise<ThemeDetailedOutput> {
+    this.auth.validateClientAccess(data.validation.accessToken)
+    const theme = await this.validate.validateThemeDetailedExists(data.id)
+
+    return this.map.mapThemeDetailed(theme)
   }
 }

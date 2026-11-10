@@ -40,7 +40,12 @@ export class LogController implements OnModuleInit {
     @ValidateInputParam() validation: ValidateInput,
     @Body() pagination: LogPaginationDto,
   ): Promise<PaginatedLogsOutput> {
-    const response = await firstValueFrom(this.logContract.GetLogs({ validation, pagination }))
+    const response = await firstValueFrom(
+      this.logContract.GetLogs({
+        validation,
+        pagination: this.map.mapLogPaginationRequest(pagination),
+      }),
+    )
     return this.map.mapPaginatedLogs(response)
   }
 
@@ -70,7 +75,11 @@ export class LogController implements OnModuleInit {
     @Body() pagination: LogPaginationDto,
   ): Promise<PaginatedLogsOutput> {
     const response = await firstValueFrom(
-      this.logContract.GetLogsByUser({ validation, userId, pagination }),
+      this.logContract.GetLogsByUser({
+        validation,
+        userId,
+        pagination: this.map.mapLogPaginationRequest(pagination),
+      }),
     )
     return this.map.mapPaginatedLogs(response)
   }

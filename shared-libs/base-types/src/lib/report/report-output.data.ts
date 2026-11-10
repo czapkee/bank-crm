@@ -9,8 +9,8 @@ export interface ReportListBaseOutput {
   status: number;
   feedbackType: number;
   priority: number;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface ReportBaseOutput {
@@ -24,9 +24,9 @@ export interface ReportBaseOutput {
   status: number;
   feedbackType: number;
   priority: number;
-  resolvedAt: Date | null;
-  createdAt: Date;
-  updatedAt: Date;
+  resolvedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface ReportPaginationBaseOutput extends PaginationBaseOutput {
@@ -36,8 +36,8 @@ export interface ReportPaginationBaseOutput extends PaginationBaseOutput {
   status?: number;
   feedbackType?: number;
   priority?: number;
-  dateFrom?: Date;
-  dateTo?: Date;
+  dateFrom?: string;
+  dateTo?: string;
 }
 
 export interface PaginatedReportsBaseOutput {

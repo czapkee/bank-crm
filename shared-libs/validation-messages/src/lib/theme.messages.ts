@@ -3,6 +3,8 @@ import { THEME_CONFIG } from '@org/validation-config'
 export const THEME_MESSAGES = {
   THEME_NOT_FOUND: 'Тема не найдена',
   THEME_HAS_CHILDREN: 'Нельзя удалить тему, у которой есть дочерние темы',
+  THEME_NAME_EXISTS: 'Тема с таким названием уже существует',
+  THEME_PARENT_INVALID: 'Некорректная родительская тема',
   NAME_VALIDATION: {
     NOT_EMPTY: 'Название темы не может быть пустым',
     TYPE: 'Название темы должно быть строкой',

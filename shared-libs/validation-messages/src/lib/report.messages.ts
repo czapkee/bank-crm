@@ -5,6 +5,7 @@ export const REPORT_MESSAGES = {
   REPORT_NOT_FOUND: 'Обращение не найдено',
   REPORT_CLOSED: 'Обращение уже закрыто',
   REPORT_ALREADY_ASSIGNED: 'Обращение уже назначено сотруднику',
+  REPORT_FEEDBACK_CONTACT_REQUIRED: 'Для выбранного способа обратной связи необходимо указать контакт',
   TITLE_VALIDATION: {
     NOT_EMPTY: 'Заголовок обращения не может быть пустым',
     TYPE: 'Заголовок обращения должен быть строкой',

@@ -53,6 +53,9 @@ export class ReportGatewayMapService {
   mapReportList(report: GrpcReportListOutput): ReportListOutput {
     return {
       ...report,
+      userId: report.userId ?? null,
+      assignedToId: report.assignedToId ?? null,
+      themeId: report.themeId ?? null,
       status: this.mapReportStatus(report.status),
       feedbackType: this.mapReportFeedback(report.feedbackType),
       priority: this.mapReportPriority(report.priority),
@@ -62,9 +65,14 @@ export class ReportGatewayMapService {
   mapReport(report: GrpcReportOutput): ReportOutput {
     return {
       ...report,
+      userId: report.userId ?? null,
+      assignedToId: report.assignedToId ?? null,
+      feedbackContact: report.feedbackContact ?? null,
+      themeId: report.themeId ?? null,
       status: this.mapReportStatus(report.status),
       feedbackType: this.mapReportFeedback(report.feedbackType),
       priority: this.mapReportPriority(report.priority),
+      resolvedAt: report.resolvedAt ?? null,
     }
   }
 
@@ -91,6 +99,8 @@ export class ReportGatewayMapService {
           : REPORT_FEEDBACKS_TO_GRPC[pagination.feedbackType],
       priority:
         pagination.priority === undefined ? undefined : REPORT_PRIORITIES_TO_GRPC[pagination.priority],
+      dateFrom: pagination.dateFrom === undefined ? undefined : new Date(pagination.dateFrom).toISOString(),
+      dateTo: pagination.dateTo === undefined ? undefined : new Date(pagination.dateTo).toISOString(),
     }
   }
 
@@ -130,7 +140,7 @@ export class ReportGatewayMapService {
   mapPaginatedReports(output: GrpcPaginatedReportsOutput): PaginatedReportsOutput {
     return {
       pagination: this.mapReportPagination(output.pagination),
-      reports: output.reports.map((report) => this.mapReportList(report)),
+      reports: (output.reports ?? []).map((report) => this.mapReportList(report)),
     }
   }
 }

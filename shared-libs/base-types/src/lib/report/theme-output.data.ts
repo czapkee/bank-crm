@@ -5,8 +5,8 @@ export interface ThemeBaseOutput {
   name: string;
   description: string | null;
   parentId: string | null;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface ThemeDetailedBaseOutput extends ThemeBaseOutput {

@@ -9,6 +9,7 @@ import type {
   CreatePaymentInput,
   CreateReportInput,
   EmployeePaginationInput,
+  LogPaginationInput,
   PaymentPaginationInput,
   ReportPaginationInput,
   UpdateCardInput,
@@ -87,11 +88,13 @@ export type GrpcChangePaymentStatusInput = Omit<ChangePaymentStatusInput, 'statu
 
 export type GrpcReportPaginationInput = Omit<
   ReportPaginationInput,
-  'status' | 'feedbackType' | 'priority'
+  'status' | 'feedbackType' | 'priority' | 'dateFrom' | 'dateTo'
 > & {
   status?: number
   feedbackType?: number
   priority?: number
+  dateFrom?: string
+  dateTo?: string
 }
 
 export type GrpcCreateReportInput = Omit<CreateReportInput, 'feedbackType'> & {
@@ -113,4 +116,9 @@ export type GrpcUpdateReportInput = Omit<
 
 export type GrpcChangeReportStatusInput = Omit<ChangeReportStatusInput, 'status'> & {
   status: number
+}
+
+export type GrpcLogPaginationInput = Omit<LogPaginationInput, 'dateFrom' | 'dateTo'> & {
+  dateFrom?: string
+  dateTo?: string
 }

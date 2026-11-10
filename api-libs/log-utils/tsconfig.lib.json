@@ -18,5 +18,21 @@
     },
     {
       "path": "../log-database/tsconfig.lib.json"
-    }]
+    },
+    {
+      "path": "../../shared-libs/validation-messages/tsconfig.lib.json"
+    },
+    {
+      "path": "../../shared-libs/validation-config/tsconfig.lib.json"
+    },
+    {
+      "path": "../../shared-libs/grpc-types/tsconfig.lib.json"
+    },
+    {
+      "path": "../../shared-libs/enums/tsconfig.lib.json"
+    },
+    {
+      "path": "../../shared-libs/base-types/tsconfig.lib.json"
+    }
+  ]
 }

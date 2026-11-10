@@ -6,8 +6,8 @@ export interface LogPaginationBaseInput extends PaginationBaseInput {
   method?: string;
   action?: string;
   userId?: string;
-  dateFrom?: Date;
-  dateTo?: Date;
+  dateFrom?: Date | string;
+  dateTo?: Date | string;
 }
 
 export interface GetLogsBaseInput {

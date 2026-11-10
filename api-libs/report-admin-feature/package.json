@@ -19,7 +19,9 @@
     "@nestjs/common": "^11.0.0",
     "@nestjs/microservices": "^11.2.1",
     "@org/grpc-types": "0.0.1",
+    "@org/report-database": "0.0.1",
     "@org/report-utils": "0.0.1",
+    "@org/validation-messages": "0.0.1",
     "tslib": "^2.3.0"
   }
 }

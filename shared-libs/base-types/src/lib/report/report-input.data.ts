@@ -7,8 +7,8 @@ export interface ReportPaginationBaseInput extends PaginationBaseInput {
   status?: number;
   feedbackType?: number;
   priority?: number;
-  dateFrom?: Date;
-  dateTo?: Date;
+  dateFrom?: Date | string;
+  dateTo?: Date | string;
 }
 
 export interface GetMyReportsBaseInput {

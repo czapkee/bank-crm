@@ -9,20 +9,24 @@ import type {
 @Injectable()
 export class ThemeGatewayMapService {
   mapTheme(theme: ThemeOutput): ThemeOutput {
-    return theme
+    return {
+      ...theme,
+      description: theme.description ?? null,
+      parentId: theme.parentId ?? null,
+    }
   }
 
   mapThemeDetailed(theme: ThemeDetailedOutput): ThemeDetailedOutput {
     return {
       ...theme,
-      children: theme.children.map((child) => this.mapTheme(child)),
+      children: (theme.children ?? []).map((child) => this.mapTheme(child)),
     }
   }
 
   mapPaginatedThemes(output: PaginatedThemesOutput): PaginatedThemesOutput {
     return {
       pagination: output.pagination,
-      themes: output.themes.map((theme) => this.mapTheme(theme)),
+      themes: (output.themes ?? []).map((theme) => this.mapTheme(theme)),
     }
   }
 }

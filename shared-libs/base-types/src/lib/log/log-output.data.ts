@@ -9,7 +9,7 @@ export interface LogBaseOutput {
   userId: string | null;
   data: string | null;
   userAgent: string | null;
-  createdAt: Date;
+  createdAt: string;
 }
 
 export interface LogPaginationBaseOutput extends PaginationBaseOutput {
@@ -18,8 +18,8 @@ export interface LogPaginationBaseOutput extends PaginationBaseOutput {
   method?: string;
   action?: string;
   userId?: string;
-  dateFrom?: Date;
-  dateTo?: Date;
+  dateFrom?: string;
+  dateTo?: string;
 }
 
 export interface PaginatedLogsBaseOutput {
