@@ -22,7 +22,7 @@ const UTILS = [ReportAuthUtil, ReportDatabaseUtil, ReportMapUtil, ReportValidate
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         secret:
-          config.get<string>('BANK-CRM_JWT_SECRET') ??
+          config.get<string>('BANK_CRM_JWT_SECRET') ??
           config.get<string>('BANK_CRM_JWT_SECRET') ??
           'DEFAULT_JWT_SECRET_DONT_USE_IN_PRODUCTION',
         signOptions: {

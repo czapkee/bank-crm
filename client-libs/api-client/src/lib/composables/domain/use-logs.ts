@@ -31,8 +31,8 @@ export function useLogs(): UseLogsReturn {
     )
 
     if (result) {
-      logs.value = result.logs
-      pagination.value = result.pagination
+      logs.value = result.logs ?? []
+      pagination.value = result.pagination ?? null
     }
 
     return result
@@ -47,8 +47,8 @@ export function useLogs(): UseLogsReturn {
     )
 
     if (result) {
-      logs.value = result.logs
-      pagination.value = result.pagination
+      logs.value = result.logs ?? []
+      pagination.value = result.pagination ?? null
     }
 
     return result

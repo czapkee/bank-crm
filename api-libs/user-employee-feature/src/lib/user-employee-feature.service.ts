@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common'
+import { LogPublisher } from '@org/rmq-config'
+import { USER_LOG_ACTIONS } from '@org/rmq-messages'
 import { UserDatabaseUtil, UserMapUtil, UserPasswordUtil, UserTokenUtil, UserValidateUtil } from '@org/user-utils'
 
 import type {
@@ -24,6 +26,7 @@ export class UserEmployeeFeatureService implements EmployeeServiceContract {
     private readonly password: UserPasswordUtil,
     private readonly token: UserTokenUtil,
     private readonly map: UserMapUtil,
+    private readonly log: LogPublisher,
   ) {}
 
   async Register(data: EmployeeRegisterInput): Promise<EmployeeAuthOutput> {
@@ -32,11 +35,29 @@ export class UserEmployeeFeatureService implements EmployeeServiceContract {
     const passwordHash = await this.password.hashPassword(data.password)
     const updated = await this.db.registerEmployee(auth.user.id, passwordHash)
 
+    this.log.publish({
+      service: 'user',
+      entity: 'Employee',
+      method: 'Register',
+      action: USER_LOG_ACTIONS.EMPLOYEE_REGISTER,
+      userId: updated.user.id,
+      data: { email: data.email },
+    })
+
     return this.token.generateTokens(updated.user.id, 'employee', this.map.mapRole(updated.role))
   }
 
   async Login(data: EmployeeLoginInput): Promise<EmployeeAuthOutput> {
     const auth = await this.validate.validateEmployeeCredentials(data.email, data.password)
+
+    this.log.publish({
+      service: 'user',
+      entity: 'Employee',
+      method: 'Login',
+      action: USER_LOG_ACTIONS.EMPLOYEE_LOGIN,
+      userId: auth.user.id,
+      data: { email: data.email },
+    })
 
     return this.token.generateTokens(auth.user.id, 'employee', this.map.mapRole(auth.role))
   }
@@ -64,6 +85,15 @@ export class UserEmployeeFeatureService implements EmployeeServiceContract {
     await this.validate.validateProfileUnique(data, auth.user.id)
     const updated = await this.db.updateEmployeeProfile(auth.user.id, data)
 
+    this.log.publish({
+      service: 'user',
+      entity: 'Employee',
+      method: 'UpdateProfile',
+      action: USER_LOG_ACTIONS.EMPLOYEE_UPDATE_PROFILE,
+      userId: auth.user.id,
+      data: { ...data },
+    })
+
     return this.map.mapEmployee(updated)
   }
 
@@ -80,6 +110,14 @@ export class UserEmployeeFeatureService implements EmployeeServiceContract {
     const passwordHash = await this.password.hashPassword(data.newPassword)
     await this.db.updateEmployeePassword(auth.user.id, passwordHash)
 
+    this.log.publish({
+      service: 'user',
+      entity: 'Employee',
+      method: 'ChangePassword',
+      action: USER_LOG_ACTIONS.EMPLOYEE_CHANGE_PASSWORD,
+      userId: auth.user.id,
+    })
+
     return {}
   }
 
@@ -91,6 +129,15 @@ export class UserEmployeeFeatureService implements EmployeeServiceContract {
     }
 
     await this.db.deleteEmployee(auth.user.id)
+
+    this.log.publish({
+      service: 'user',
+      entity: 'Employee',
+      method: 'DeleteAccount',
+      action: USER_LOG_ACTIONS.EMPLOYEE_DELETE_ACCOUNT,
+      userId: auth.user.id,
+      data: { email: auth.email },
+    })
 
     return {}
   }

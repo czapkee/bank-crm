@@ -49,8 +49,8 @@ export function useCards(): UseCardsReturn {
     )
 
     if (result) {
-      cards.value = result.cards
-      pagination.value = result.pagination
+      cards.value = result.cards ?? []
+      pagination.value = result.pagination ?? null
     }
 
     return result
@@ -65,8 +65,8 @@ export function useCards(): UseCardsReturn {
     )
 
     if (result) {
-      cards.value = result.cards
-      pagination.value = result.pagination
+      cards.value = result.cards ?? []
+      pagination.value = result.pagination ?? null
     }
 
     return result

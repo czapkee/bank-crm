@@ -149,6 +149,12 @@
     },
     {
       "path": "./client-libs/admin-portal"
+    },
+    {
+      "path": "./shared-libs/rmq-messages"
+    },
+    {
+      "path": "./api-libs/rmq-config"
     }
   ],
   "compilerOptions": {}

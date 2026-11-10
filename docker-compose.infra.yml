@@ -1,7 +1,46 @@
 services:
-  card-db:
+  rabbitmq-infra:
+    image: rabbitmq:4.3.6-alpine
+    container_name: bank-crm-rabbitmq-infra
+    environment:
+      RABBITMQ_DEFAULT_USER: ${BANK_CRM_RMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${BANK_CRM_RMQ_PASSWORD}
+    ports:
+      - "${BANK_CRM_RMQ_PORT}:5672"
+      - "${BANK_CRM_RMQ_MANAGEMENT_PORT}:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - rabbitmq_data-infra:/var/lib/rabbitmq
+    networks:
+      - bank-crm-infra
+
+  redis-infra:
+    image: redis:8.10.2-alpine
+    container_name: bank-crm-redis-infra
+    command: >
+      redis-server
+      --appendonly yes
+      --maxmemory-policy allkeys-lru
+      --requirepass ${BANK_CRM_REDIS_PASSWORD}
+    ports:
+      - "${BANK_CRM_REDIS_PORT}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${BANK_CRM_REDIS_PASSWORD}", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - redis_data-infra:/data
+    networks:
+      - bank-crm-infra
+
+  card-db-infra:
     image: postgres:18.6-alpine
-    container_name: card-db
+    container_name: bank-crm-card-db-infra
     environment:
       POSTGRES_DB: ${CARD_DB_NAME}
       POSTGRES_USER: ${CARD_DB_USER}
@@ -9,20 +48,18 @@ services:
     ports:
       - "${CARD_DB_PORT}:5432"
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "pg_isready -U ${CARD_DB_USER} -d ${CARD_DB_NAME}",
-        ]
+      test: ["CMD-SHELL", "pg_isready -U ${CARD_DB_USER} -d ${CARD_DB_NAME}"]
       interval: 5s
       timeout: 5s
       retries: 5
     volumes:
-      - card_db_data:/var/lib/postrgesql
+      - card_db_data-infra:/var/lib/postgresql
+    networks:
+      - bank-crm-infra
 
-  log-db:
+  log-db-infra:
     image: postgres:18.6-alpine
-    container_name: log-db
+    container_name: bank-crm-log-db-infra
     environment:
       POSTGRES_DB: ${LOG_DB_NAME}
       POSTGRES_USER: ${LOG_DB_USER}
@@ -30,20 +67,18 @@ services:
     ports:
       - "${LOG_DB_PORT}:5432"
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "pg_isready -U ${LOG_DB_USER} -d ${LOG_DB_NAME}",
-        ]
+      test: ["CMD-SHELL", "pg_isready -U ${LOG_DB_USER} -d ${LOG_DB_NAME}"]
       interval: 5s
       timeout: 5s
       retries: 5
     volumes:
-      - log_db_data:/var/lib/postrgesql
+      - log_db_data-infra:/var/lib/postgresql
+    networks:
+      - bank-crm-infra
 
-  report-db:
+  report-db-infra:
     image: postgres:18.6-alpine
-    container_name: report-db
+    container_name: bank-crm-report-db-infra
     environment:
       POSTGRES_DB: ${REPORT_DB_NAME}
       POSTGRES_USER: ${REPORT_DB_USER}
@@ -51,20 +86,18 @@ services:
     ports:
       - "${REPORT_DB_PORT}:5432"
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "pg_isready -U ${REPORT_DB_USER} -d ${REPORT_DB_NAME}",
-        ]
+      test: ["CMD-SHELL", "pg_isready -U ${REPORT_DB_USER} -d ${REPORT_DB_NAME}"]
       interval: 5s
       timeout: 5s
       retries: 5
     volumes:
-      - report_db_data:/var/lib/postrgesql
+      - report_db_data-infra:/var/lib/postgresql
+    networks:
+      - bank-crm-infra
 
-  user-db:
+  user-db-infra:
     image: postgres:18.6-alpine
-    container_name: user-db
+    container_name: bank-crm-user-db-infra
     environment:
       POSTGRES_DB: ${USER_DB_NAME}
       POSTGRES_USER: ${USER_DB_USER}
@@ -72,19 +105,46 @@ services:
     ports:
       - "${USER_DB_PORT}:5432"
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "pg_isready -U ${USER_DB_USER} -d ${USER_DB_NAME}",
-        ]
+      test: ["CMD-SHELL", "pg_isready -U ${USER_DB_USER} -d ${USER_DB_NAME}"]
       interval: 5s
       timeout: 5s
       retries: 5
     volumes:
-      - user_db_data:/var/lib/postrgesql
+      - user_db_data-infra:/var/lib/postgresql
+    networks:
+      - bank-crm-infra
+
+  migrator-infra:
+    build:
+      context: .
+      dockerfile: docker-files/Db-Migrator.Dockerfile
+    container_name: bank-crm-migrator-infra
+    environment:
+      CARD_DB_URL: postgresql://${CARD_DB_USER}:${CARD_DB_PASSWORD}@card-db-infra:5432/${CARD_DB_NAME}?schema=public
+      LOG_DB_URL: postgresql://${LOG_DB_USER}:${LOG_DB_PASSWORD}@log-db-infra:5432/${LOG_DB_NAME}?schema=public
+      REPORT_DB_URL: postgresql://${REPORT_DB_USER}:${REPORT_DB_PASSWORD}@report-db-infra:5432/${REPORT_DB_NAME}?schema=public
+      USER_DB_URL: postgresql://${USER_DB_USER}:${USER_DB_PASSWORD}@user-db-infra:5432/${USER_DB_NAME}?schema=public
+    depends_on:
+      card-db-infra:
+        condition: service_healthy
+      log-db-infra:
+        condition: service_healthy
+      report-db-infra:
+        condition: service_healthy
+      user-db-infra:
+        condition: service_healthy
+    restart: "no"
+    networks:
+      - bank-crm-infra
 
 volumes:
-  user_db_data:
-  report_db_data:
-  log_db_data:
-  card_db_data:
+  rabbitmq_data-infra:
+  redis_data-infra:
+  card_db_data-infra:
+  log_db_data-infra:
+  report_db_data-infra:
+  user_db_data-infra:
+
+networks:
+  bank-crm-infra:
+    driver: bridge

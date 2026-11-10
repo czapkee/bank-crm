@@ -11,10 +11,10 @@ import { REPORT_CONTROLLERS } from './report/main.js'
 import { USER_CONTROLLERS } from './user/main.js'
 
 const SERVICES = [
-  { name: 'USER', env: 'BANK-CRM_USER_GRPC_URL', url: 'localhost:5003' },
-  { name: 'CARD', env: 'BANK-CRM_CARD_GRPC_URL', url: 'localhost:5000' },
-  { name: 'LOG', env: 'BANK-CRM_LOG_GRPC_URL', url: 'localhost:5001' },
-  { name: 'REPORT', env: 'BANK-CRM_REPORT_GRPC_URL', url: 'localhost:5002' },
+  { name: 'USER', env: 'BANK_CRM_USER_GRPC_URL', url: 'localhost:5003' },
+  { name: 'CARD', env: 'BANK_CRM_CARD_GRPC_URL', url: 'localhost:5000' },
+  { name: 'LOG', env: 'BANK_CRM_LOG_GRPC_URL', url: 'localhost:5001' },
+  { name: 'REPORT', env: 'BANK_CRM_REPORT_GRPC_URL', url: 'localhost:5002' },
 ]
 
 @Module({
@@ -31,6 +31,7 @@ const SERVICES = [
             protoPath: join(workspaceRoot, `proto/${service.name.toLowerCase()}.proto`),
             loader: {
               includeDirs: [join(workspaceRoot, 'proto')],
+              defaults: true,
             },
           },
         }),

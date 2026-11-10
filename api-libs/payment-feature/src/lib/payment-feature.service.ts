@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { CardAuthUtil, CardDatabaseUtil, CardMapUtil, CardValidateUtil } from '@org/card-utils'
+import { LogPublisher } from '@org/rmq-config'
+import { CARD_LOG_ACTIONS } from '@org/rmq-messages'
 
 import type {
   GetMyCardPaymentsInput,
@@ -17,6 +19,7 @@ export class PaymentFeatureService implements PaymentServiceContract {
     private readonly auth: CardAuthUtil,
     private readonly validate: CardValidateUtil,
     private readonly map: CardMapUtil,
+    private readonly log: LogPublisher,
   ) {}
 
   async WriteOffCard(data: WriteOffCardInput): Promise<PaymentOutput> {
@@ -35,6 +38,15 @@ export class PaymentFeatureService implements PaymentServiceContract {
       sum,
       service,
       reference,
+    })
+
+    this.log.publish({
+      service: 'card',
+      entity: 'Payment',
+      method: 'WriteOffCard',
+      action: CARD_LOG_ACTIONS.PAYMENT_WRITE_OFF,
+      userId: payload.id,
+      data: { paymentId: payment.id, cardId: data.cardId, sum: data.sum },
     })
 
     return this.map.mapPayment(payment)

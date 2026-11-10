@@ -66,7 +66,7 @@ export function useDashboard(): UseDashboardReturn {
           method: 'QUERY',
           body: { page: 1, limit: 100 },
         })
-        cardSample.value = cardsPage.cards
+        cardSample.value = cardsPage.cards ?? []
       } catch {
         cardSample.value = []
       }

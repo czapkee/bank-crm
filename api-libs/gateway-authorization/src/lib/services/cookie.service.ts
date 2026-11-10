@@ -12,7 +12,7 @@ export class CookieService {
   private readonly isDevMode: boolean
 
   constructor(config: ConfigService) {
-    this.isDevMode = config.get<string>('BANK-CRM_DEV_MODE', 'false') === 'true'
+    this.isDevMode = config.get<string>('BANK_CRM_DEV_MODE', 'false') === 'true'
   }
 
   setRefreshToken(res: Response, token: string): void {

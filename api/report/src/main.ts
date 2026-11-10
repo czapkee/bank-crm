@@ -3,7 +3,7 @@ import { microservice } from '@org/nest-launcher';
 import { AppModule } from './app.module';
 
 void microservice<AppModule>({
-  scope: 'BANK-CRM',
+  scope: 'BANK_CRM',
   name: 'Report',
   module: AppModule,
   rabbitMQ: false,

@@ -1,0 +1,308 @@
+services:
+  rabbitmq:
+    image: rabbitmq:4.3.6-alpine
+    container_name: bank-crm-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${BANK_CRM_RMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${BANK_CRM_RMQ_PASSWORD}
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - bank-crm
+    restart: unless-stopped
+
+  redis:
+    image: redis:8.10.2-alpine
+    container_name: bank-crm-redis
+    command: >
+      redis-server
+      --appendonly yes
+      --maxmemory-policy allkeys-lru
+      --requirepass ${BANK_CRM_REDIS_PASSWORD}
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${BANK_CRM_REDIS_PASSWORD}", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - redis_data:/data
+    networks:
+      - bank-crm
+    restart: unless-stopped
+
+  card-db:
+    image: postgres:18.6-alpine
+    container_name: bank-crm-card-db
+    environment:
+      POSTGRES_DB: ${CARD_DB_NAME}
+      POSTGRES_USER: ${CARD_DB_USER}
+      POSTGRES_PASSWORD: ${CARD_DB_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${CARD_DB_USER} -d ${CARD_DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - card_db_data:/var/lib/postgresql
+    networks:
+      - bank-crm
+    restart: unless-stopped
+
+  log-db:
+    image: postgres:18.6-alpine
+    container_name: bank-crm-log-db
+    environment:
+      POSTGRES_DB: ${LOG_DB_NAME}
+      POSTGRES_USER: ${LOG_DB_USER}
+      POSTGRES_PASSWORD: ${LOG_DB_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${LOG_DB_USER} -d ${LOG_DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - log_db_data:/var/lib/postgresql
+    networks:
+      - bank-crm
+    restart: unless-stopped
+
+  report-db:
+    image: postgres:18.6-alpine
+    container_name: bank-crm-report-db
+    environment:
+      POSTGRES_DB: ${REPORT_DB_NAME}
+      POSTGRES_USER: ${REPORT_DB_USER}
+      POSTGRES_PASSWORD: ${REPORT_DB_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${REPORT_DB_USER} -d ${REPORT_DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - report_db_data:/var/lib/postgresql
+    networks:
+      - bank-crm
+    restart: unless-stopped
+
+  user-db:
+    image: postgres:18.6-alpine
+    container_name: bank-crm-user-db
+    environment:
+      POSTGRES_DB: ${USER_DB_NAME}
+      POSTGRES_USER: ${USER_DB_USER}
+      POSTGRES_PASSWORD: ${USER_DB_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${USER_DB_USER} -d ${USER_DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - user_db_data:/var/lib/postgresql
+    networks:
+      - bank-crm
+    restart: unless-stopped
+
+  migrator:
+    image: ${DOCKER_REGISTRY}/bank-crm-migrator:${DOCKER_APPS_VERSION}
+    build:
+      context: .
+      dockerfile: docker-files/Db-Migrator.Dockerfile
+    container_name: bank-crm-migrator
+    environment:
+      CARD_DB_URL: postgresql://${CARD_DB_USER}:${CARD_DB_PASSWORD}@card-db:5432/${CARD_DB_NAME}?schema=public
+      LOG_DB_URL: postgresql://${LOG_DB_USER}:${LOG_DB_PASSWORD}@log-db:5432/${LOG_DB_NAME}?schema=public
+      REPORT_DB_URL: postgresql://${REPORT_DB_USER}:${REPORT_DB_PASSWORD}@report-db:5432/${REPORT_DB_NAME}?schema=public
+      USER_DB_URL: postgresql://${USER_DB_USER}:${USER_DB_PASSWORD}@user-db:5432/${USER_DB_NAME}?schema=public
+    depends_on:
+      card-db:
+        condition: service_healthy
+      log-db:
+        condition: service_healthy
+      report-db:
+        condition: service_healthy
+      user-db:
+        condition: service_healthy
+    restart: "no"
+    networks:
+      - bank-crm
+
+  user:
+    image: ${DOCKER_REGISTRY}/bank-crm-user:${DOCKER_APPS_VERSION}
+    build:
+      context: .
+      dockerfile: docker-files/User.Dockerfile
+    container_name: bank-crm-user
+    environment:
+      BANK_CRM_DEV_MODE: "true"
+      BANK_CRM_JWT_SECRET: ${BANK_CRM_JWT_SECRET}
+      BANK_CRM_USER_GRPC_PORT: ${BANK_CRM_USER_GRPC_PORT}
+      USER_DB_URL: postgresql://${USER_DB_USER}:${USER_DB_PASSWORD}@user-db:5432/${USER_DB_NAME}?schema=public
+      BANK_CRM_RMQ_URL: rabbitmq:5672
+      BANK_CRM_RMQ_USER: ${BANK_CRM_RMQ_USER}
+      BANK_CRM_RMQ_PASSWORD: ${BANK_CRM_RMQ_PASSWORD}
+      BANK_CRM_REDIS_URL: redis://redis:6379
+      BANK_CRM_REDIS_PASSWORD: ${BANK_CRM_REDIS_PASSWORD}
+    depends_on:
+      user-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
+    networks:
+      - bank-crm
+    restart: unless-stopped
+
+  card:
+    image: ${DOCKER_REGISTRY}/bank-crm-card:${DOCKER_APPS_VERSION}
+    build:
+      context: .
+      dockerfile: docker-files/Card.Dockerfile
+    container_name: bank-crm-card
+    environment:
+      BANK_CRM_DEV_MODE: "true"
+      BANK_CRM_JWT_SECRET: ${BANK_CRM_JWT_SECRET}
+      BANK_CRM_CARD_GRPC_PORT: ${BANK_CRM_CARD_GRPC_PORT}
+      CARD_DB_URL: postgresql://${CARD_DB_USER}:${CARD_DB_PASSWORD}@card-db:5432/${CARD_DB_NAME}?schema=public
+      BANK_CRM_RMQ_URL: rabbitmq:5672
+      BANK_CRM_RMQ_USER: ${BANK_CRM_RMQ_USER}
+      BANK_CRM_RMQ_PASSWORD: ${BANK_CRM_RMQ_PASSWORD}
+      BANK_CRM_REDIS_URL: redis://redis:6379
+      BANK_CRM_REDIS_PASSWORD: ${BANK_CRM_REDIS_PASSWORD}
+    depends_on:
+      card-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
+    networks:
+      - bank-crm
+    restart: unless-stopped
+
+  report:
+    image: ${DOCKER_REGISTRY}/bank-crm-report:${DOCKER_APPS_VERSION}
+    build:
+      context: .
+      dockerfile: docker-files/Report.Dockerfile
+    container_name: bank-crm-report
+    environment:
+      BANK_CRM_DEV_MODE: "true"
+      BANK_CRM_JWT_SECRET: ${BANK_CRM_JWT_SECRET}
+      BANK_CRM_REPORT_GRPC_PORT: ${BANK_CRM_REPORT_GRPC_PORT}
+      REPORT_DB_URL: postgresql://${REPORT_DB_USER}:${REPORT_DB_PASSWORD}@report-db:5432/${REPORT_DB_NAME}?schema=public
+      BANK_CRM_RMQ_URL: rabbitmq:5672
+      BANK_CRM_RMQ_USER: ${BANK_CRM_RMQ_USER}
+      BANK_CRM_RMQ_PASSWORD: ${BANK_CRM_RMQ_PASSWORD}
+      BANK_CRM_REDIS_URL: redis://redis:6379
+      BANK_CRM_REDIS_PASSWORD: ${BANK_CRM_REDIS_PASSWORD}
+    depends_on:
+      report-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
+    networks:
+      - bank-crm
+    restart: unless-stopped
+
+  log:
+    image: ${DOCKER_REGISTRY}/bank-crm-log:${DOCKER_APPS_VERSION}
+    build:
+      context: .
+      dockerfile: docker-files/Log.Dockerfile
+    container_name: bank-crm-log
+    environment:
+      BANK_CRM_DEV_MODE: "true"
+      BANK_CRM_JWT_SECRET: ${BANK_CRM_JWT_SECRET}
+      BANK_CRM_LOG_GRPC_PORT: ${BANK_CRM_LOG_GRPC_PORT}
+      LOG_DB_URL: postgresql://${LOG_DB_USER}:${LOG_DB_PASSWORD}@log-db:5432/${LOG_DB_NAME}?schema=public
+      BANK_CRM_RMQ_URL: rabbitmq:5672
+      BANK_CRM_RMQ_USER: ${BANK_CRM_RMQ_USER}
+      BANK_CRM_RMQ_PASSWORD: ${BANK_CRM_RMQ_PASSWORD}
+      BANK_CRM_REDIS_URL: redis://redis:6379
+      BANK_CRM_REDIS_PASSWORD: ${BANK_CRM_REDIS_PASSWORD}
+      BANK_CRM_LOG_CACHE_TTL: ${BANK_CRM_LOG_CACHE_TTL}
+    depends_on:
+      log-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
+    networks:
+      - bank-crm
+    restart: unless-stopped
+
+  gateway:
+    image: ${DOCKER_REGISTRY}/bank-crm-gateway:${DOCKER_APPS_VERSION}
+    build:
+      context: .
+      dockerfile: docker-files/Gateway.Dockerfile
+    container_name: bank-crm-gateway
+    environment:
+      BANK_CRM_DEV_MODE: "true"
+      BANK_CRM_JWT_SECRET: ${BANK_CRM_JWT_SECRET}
+      BANK_CRM_GATEWAY_HTTP_PORT: ${BANK_CRM_GATEWAY_HTTP_PORT}
+      BANK_CRM_GATEWAY_WINDOW_MS_MINUTES: ${BANK_CRM_GATEWAY_WINDOW_MS_MINUTES}
+      BANK_CRM_GATEWAY_REQUEST_LIMIT: ${BANK_CRM_GATEWAY_REQUEST_LIMIT}
+      BANK_CRM_GATEWAY_CORS_ORIGINS: ${BANK_CRM_GATEWAY_CORS_ORIGINS}
+      BANK_CRM_USER_GRPC_URL: user:5003
+      BANK_CRM_CARD_GRPC_URL: card:5000
+      BANK_CRM_LOG_GRPC_URL: log:5001
+      BANK_CRM_REPORT_GRPC_URL: report:5002
+    ports:
+      - "${BANK_CRM_GATEWAY_HTTP_PORT}:${BANK_CRM_GATEWAY_HTTP_PORT}"
+    depends_on:
+      user:
+        condition: service_started
+      card:
+        condition: service_started
+      report:
+        condition: service_started
+      log:
+        condition: service_started
+    networks:
+      - bank-crm
+    restart: unless-stopped
+
+  client:
+    image: ${DOCKER_REGISTRY}/bank-crm-client:${DOCKER_APPS_VERSION}
+    build:
+      context: .
+      dockerfile: docker-files/Client.Dockerfile
+    container_name: bank-crm-client
+    ports:
+      - "${BANK_CRM_CLIENT_PORT}:80"
+    depends_on:
+      gateway:
+        condition: service_started
+    networks:
+      - bank-crm
+    restart: unless-stopped
+
+volumes:
+  rabbitmq_data:
+  redis_data:
+  card_db_data:
+  log_db_data:
+  report_db_data:
+  user_db_data:
+
+networks:
+  bank-crm:
+    driver: bridge

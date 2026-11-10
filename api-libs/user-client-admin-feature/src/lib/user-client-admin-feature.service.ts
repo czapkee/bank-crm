@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common'
+import { LogPublisher } from '@org/rmq-config'
+import { USER_LOG_ACTIONS } from '@org/rmq-messages'
 import { UserDatabaseUtil, UserMapUtil, UserPasswordUtil, UserValidateUtil } from '@org/user-utils'
 
 import type {
@@ -21,6 +23,7 @@ export class UserClientAdminFeatureService implements ClientAdminServiceContract
     private readonly validate: UserValidateUtil,
     private readonly password: UserPasswordUtil,
     private readonly map: UserMapUtil,
+    private readonly log: LogPublisher,
   ) {}
 
   async GetClients(data: GetClientsInput): Promise<PaginatedClientsOutput> {
@@ -41,56 +44,112 @@ export class UserClientAdminFeatureService implements ClientAdminServiceContract
   }
 
   async CreateClient(data: CreateClientInput): Promise<ClientOutput> {
-    await this.validate.validateEmployeeAccess(data.validation.accessToken)
+    const actor = await this.validate.validateEmployeeAccess(data.validation.accessToken)
     this.validate.validatePasswordsMatch(data.password, data.confirmationPassword)
     await this.validate.validateClientEmailAvailable(data.email)
     await this.validate.validateProfileUnique(data)
     const passwordHash = await this.password.hashPassword(data.password)
     const auth = await this.db.createClientWithProfile(data, passwordHash)
 
+    this.log.publish({
+      service: 'user',
+      entity: 'Client',
+      method: 'CreateClient',
+      action: USER_LOG_ACTIONS.CLIENT_ADMIN_CREATE,
+      userId: actor.user.id,
+      data: { clientId: auth.user.id, email: data.email },
+    })
+
     return this.map.mapClient(auth)
   }
 
   async UpdateClient(data: UpdateClientInput): Promise<ClientOutput> {
-    await this.validate.validateEmployeeAccess(data.validation.accessToken)
+    const actor = await this.validate.validateEmployeeAccess(data.validation.accessToken)
     const existing = await this.validate.validateClientExists(data.id)
     await this.validate.validateClientEmailAvailable(data.email ?? existing.email, existing.email)
     await this.validate.validateProfileUnique(data, data.id)
     const auth = await this.db.updateClientProfileByAdmin(data.id, data)
 
+    this.log.publish({
+      service: 'user',
+      entity: 'Client',
+      method: 'UpdateClient',
+      action: USER_LOG_ACTIONS.CLIENT_ADMIN_UPDATE,
+      userId: actor.user.id,
+      data: { clientId: data.id, changes: { ...data } },
+    })
+
     return this.map.mapClient(auth)
   }
 
   async BlockClient(data: ClientActionInput): Promise<ClientOutput> {
-    await this.validate.validateEmployeeAccess(data.validation.accessToken)
+    const actor = await this.validate.validateEmployeeAccess(data.validation.accessToken)
     const auth = await this.validate.validateClientExists(data.id)
     this.validate.validateClientNotBlocked(auth.user.isActive)
+    const blocked = await this.db.setClientActive(data.id, false)
 
-    return this.map.mapClient(await this.db.setClientActive(data.id, false))
+    this.log.publish({
+      service: 'user',
+      entity: 'Client',
+      method: 'BlockClient',
+      action: USER_LOG_ACTIONS.CLIENT_ADMIN_BLOCK,
+      userId: actor.user.id,
+      data: { clientId: data.id },
+    })
+
+    return this.map.mapClient(blocked)
   }
 
   async UnblockClient(data: ClientActionInput): Promise<ClientOutput> {
-    await this.validate.validateEmployeeAccess(data.validation.accessToken)
+    const actor = await this.validate.validateEmployeeAccess(data.validation.accessToken)
     const auth = await this.validate.validateClientExists(data.id)
     this.validate.validateClientNotActive(auth.user.isActive)
+    const unblocked = await this.db.setClientActive(data.id, true)
 
-    return this.map.mapClient(await this.db.setClientActive(data.id, true))
+    this.log.publish({
+      service: 'user',
+      entity: 'Client',
+      method: 'UnblockClient',
+      action: USER_LOG_ACTIONS.CLIENT_ADMIN_UNBLOCK,
+      userId: actor.user.id,
+      data: { clientId: data.id },
+    })
+
+    return this.map.mapClient(unblocked)
   }
 
   async ResetClientPassword(data: ResetClientPasswordInput): Promise<Empty> {
-    await this.validate.validateEmployeeAccess(data.validation.accessToken)
+    const actor = await this.validate.validateEmployeeAccess(data.validation.accessToken)
     await this.validate.validateClientExists(data.id)
     this.validate.validatePasswordFormat(data.newPassword)
     const passwordHash = await this.password.hashPassword(data.newPassword)
     await this.db.updateClientPassword(data.id, passwordHash)
 
+    this.log.publish({
+      service: 'user',
+      entity: 'Client',
+      method: 'ResetClientPassword',
+      action: USER_LOG_ACTIONS.CLIENT_ADMIN_RESET_PASSWORD,
+      userId: actor.user.id,
+      data: { clientId: data.id },
+    })
+
     return {}
   }
 
   async DeleteClient(data: ClientActionInput): Promise<Empty> {
-    await this.validate.validateEmployeeAccess(data.validation.accessToken)
+    const actor = await this.validate.validateEmployeeAccess(data.validation.accessToken)
     await this.validate.validateClientExists(data.id)
     await this.db.deleteClient(data.id)
+
+    this.log.publish({
+      service: 'user',
+      entity: 'Client',
+      method: 'DeleteClient',
+      action: USER_LOG_ACTIONS.CLIENT_ADMIN_DELETE,
+      userId: actor.user.id,
+      data: { clientId: data.id },
+    })
 
     return {}
   }

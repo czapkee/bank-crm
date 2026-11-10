@@ -3,6 +3,8 @@ import { Injectable } from '@nestjs/common'
 import { RpcException } from '@nestjs/microservices'
 import { ReportStatus as DbReportStatus } from '@org/report-database'
 import { ReportAuthUtil, ReportDatabaseUtil, ReportMapUtil, ReportValidateUtil } from '@org/report-utils'
+import { LogPublisher } from '@org/rmq-config'
+import { REPORT_LOG_ACTIONS } from '@org/rmq-messages'
 import { REPORT_MESSAGES } from '@org/validation-messages'
 
 import type {
@@ -25,6 +27,7 @@ export class ReportAdminFeatureService implements ReportAdminServiceContract {
     private readonly auth: ReportAuthUtil,
     private readonly validate: ReportValidateUtil,
     private readonly map: ReportMapUtil,
+    private readonly log: LogPublisher,
   ) {}
 
   async GetReports(data: GetReportsInput): Promise<PaginatedReportsOutput> {
@@ -43,7 +46,7 @@ export class ReportAdminFeatureService implements ReportAdminServiceContract {
   }
 
   async UpdateReport(data: UpdateReportInput): Promise<ReportOutput> {
-    this.auth.validateAdminAccess(data.validation.accessToken)
+    const actor = this.auth.validateAdminAccess(data.validation.accessToken)
     const existing = await this.validate.validateReportExists(data.id)
     const title = data.title === undefined ? undefined : this.validate.validateTitle(data.title)
     const content =
@@ -101,16 +104,35 @@ export class ReportAdminFeatureService implements ReportAdminServiceContract {
       resolvedAt,
     })
 
+    this.log.publish({
+      service: 'report',
+      entity: 'Report',
+      method: 'UpdateReport',
+      action: REPORT_LOG_ACTIONS.ADMIN_UPDATE,
+      userId: actor.id,
+      data: { reportId: data.id, changes: { ...data } },
+    })
+
     return this.map.mapReport(report)
   }
 
   async AssignReport(data: AssignReportInput): Promise<ReportOutput> {
-    this.auth.validateAdminAccess(data.validation.accessToken)
+    const actor = this.auth.validateAdminAccess(data.validation.accessToken)
     const existing = await this.validate.validateReportExists(data.id)
     this.validate.validateReportModifiable(existing)
 
     if (data.assignedToId === undefined) {
       const report = await this.db.updateReport(data.id, { assignedToId: null })
+
+      this.log.publish({
+        service: 'report',
+        entity: 'Report',
+        method: 'AssignReport',
+        action: REPORT_LOG_ACTIONS.ADMIN_ASSIGN,
+        userId: actor.id,
+        data: { reportId: data.id, assignedToId: null },
+      })
+
       return this.map.mapReport(report)
     }
 
@@ -122,11 +144,20 @@ export class ReportAdminFeatureService implements ReportAdminServiceContract {
 
     const report = await this.db.updateReport(data.id, { assignedToId })
 
+    this.log.publish({
+      service: 'report',
+      entity: 'Report',
+      method: 'AssignReport',
+      action: REPORT_LOG_ACTIONS.ADMIN_ASSIGN,
+      userId: actor.id,
+      data: { reportId: data.id, assignedToId },
+    })
+
     return this.map.mapReport(report)
   }
 
   async ChangeReportStatus(data: ChangeReportStatusInput): Promise<ReportOutput> {
-    this.auth.validateAdminAccess(data.validation.accessToken)
+    const actor = this.auth.validateAdminAccess(data.validation.accessToken)
     const existing = await this.validate.validateReportExists(data.id)
     const status = this.validate.validateReportStatus(data.status)
 
@@ -142,11 +173,20 @@ export class ReportAdminFeatureService implements ReportAdminServiceContract {
       status === DbReportStatus.CLOSED ? existing.resolvedAt ?? new Date() : null
     const report = await this.db.updateReport(data.id, { status, resolvedAt })
 
+    this.log.publish({
+      service: 'report',
+      entity: 'Report',
+      method: 'ChangeReportStatus',
+      action: REPORT_LOG_ACTIONS.ADMIN_CHANGE_STATUS,
+      userId: actor.id,
+      data: { reportId: data.id, status: data.status },
+    })
+
     return this.map.mapReport(report)
   }
 
   async ResolveReport(data: ReportActionInput): Promise<ReportOutput> {
-    this.auth.validateAdminAccess(data.validation.accessToken)
+    const actor = this.auth.validateAdminAccess(data.validation.accessToken)
     const existing = await this.validate.validateReportExists(data.id)
     this.validate.validateReportModifiable(existing)
 
@@ -155,13 +195,31 @@ export class ReportAdminFeatureService implements ReportAdminServiceContract {
       resolvedAt: new Date(),
     })
 
+    this.log.publish({
+      service: 'report',
+      entity: 'Report',
+      method: 'ResolveReport',
+      action: REPORT_LOG_ACTIONS.ADMIN_RESOLVE,
+      userId: actor.id,
+      data: { reportId: data.id },
+    })
+
     return this.map.mapReport(report)
   }
 
   async DeleteReport(data: ReportActionInput): Promise<Empty> {
-    this.auth.validateAdminAccess(data.validation.accessToken)
+    const actor = this.auth.validateAdminAccess(data.validation.accessToken)
     await this.validate.validateReportExists(data.id)
     await this.db.deleteReport(data.id)
+
+    this.log.publish({
+      service: 'report',
+      entity: 'Report',
+      method: 'DeleteReport',
+      action: REPORT_LOG_ACTIONS.ADMIN_DELETE,
+      userId: actor.id,
+      data: { reportId: data.id },
+    })
 
     return {}
   }

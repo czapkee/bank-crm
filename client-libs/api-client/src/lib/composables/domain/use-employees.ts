@@ -52,8 +52,8 @@ export function useEmployees(): UseEmployeesReturn {
     )
 
     if (result) {
-      employees.value = result.employees
-      pagination.value = result.pagination
+      employees.value = result.employees ?? []
+      pagination.value = result.pagination ?? null
     }
 
     return result

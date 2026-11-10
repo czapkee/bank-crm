@@ -1,109 +1,124 @@
-# New Nx Repository
+# Bank CRM
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+Монорепозиторий на Nx: NestJS-микросервисы (gRPC), API-шлюз, Vue 3 клиент, PostgreSQL, RabbitMQ и Redis.
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is ready ✨.
+## Состав
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/docs/technologies/typescript/introduction?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+| Компонент | Порт | Описание |
+| --- | --- | --- |
+| `api/gateway` | 4000 | HTTP API, Swagger, авторизация |
+| `api/user` | 5003 | Пользователи, сотрудники, авторизация |
+| `api/card` | 5000 | Карты и платежи |
+| `api/report` | 5002 | Обращения и темы |
+| `api/log` | 5001 | Журнал событий |
+| `client/main` | 4200 / 80 | Vue 3 SPA |
+| PostgreSQL | 5432–5435 | По одной БД на сервис |
+| RabbitMQ | 5672 / 15672 | Очередь событий |
+| Redis | 6379 | Кеш журнала |
 
-🚀 If you haven't connected to Nx Cloud yet, [complete your setup here](https://cloud.nx.app/get-started). Get faster builds with remote caching, distributed task execution, and self-healing CI. [See how your workspace can benefit](#nx-cloud).
+## Требования
 
-## Generate a library
+- Node.js 26
+- npm 12
+- Docker и Docker Compose
 
-```sh
-npx nx g @nx/js:lib packages/pkg1 --publishable --importPath=@my-org/pkg1
+## Переменные окружения
+
+```bash
+cp .env.example .env
 ```
 
-## Run tasks
+Все переменные приложения начинаются с `BANK_CRM_`. Базы данных используют `CARD_DB_URL`, `LOG_DB_URL`, `REPORT_DB_URL`, `USER_DB_URL`.
 
-To build the library use:
+Файл `.env` ищется автоматически вверх от рабочей директории процесса, поэтому он читается и при запуске из корня, и при запуске отдельного приложения. В Docker переменные передаются через `environment` в compose, файл `.env` внутрь образов не копируется.
 
-```sh
-npx nx run pkg1:build
+Для локального запуска в `.env` указаны адреса `localhost`. В compose адреса БД, RabbitMQ и Redis переопределяются на имена контейнеров.
+
+## Локальный запуск
+
+```bash
+cp .env.example .env
+npm install
+docker compose -f docker-compose.infra.yml up -d --build
+npm run all:dev
 ```
 
-To run any task with Nx use:
+- Клиент: http://localhost:4200
+- API: http://localhost:4000/api
+- Swagger: http://localhost:4000/api/docs
+- RabbitMQ UI: http://localhost:15672
 
-```sh
-npx nx run <project-name>:<target>
+`docker-compose.infra.yml` поднимает PostgreSQL, RabbitMQ, Redis и контейнер миграций. Миграции применяются автоматически при старте. Все контейнеры, тома и сеть в этом файле имеют суффикс `-infra`.
+
+Остановить инфраструктуру:
+
+```bash
+docker compose -f docker-compose.infra.yml down
 ```
 
-These targets are either [inferred automatically](https://nx.dev/docs/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
+Удалить данные:
 
-[More about running tasks in the docs &raquo;](https://nx.dev/docs/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Versioning and releasing
-
-To version and release the library use
-
-```
-npx nx release
+```bash
+docker compose -f docker-compose.infra.yml down -v
 ```
 
-Pass `--dry-run` to see what would happen without actually releasing the library.
+## Docker
 
-[Learn more about Nx release &raquo;](https://nx.dev/docs/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+- `docker-files/` — Dockerfile-ы для всех сервисов, клиента и мигратора.
+- `docker-compose.infra.yml` — только инфраструктура и мигратор, собираемый из `docker-files/Db-Migrator.Dockerfile`.
+- `docker-compose.yml` — приложение из готовых образов.
+- `docker-compose.dev.yml` — то же приложение, но с `build:` и `BANK_CRM_DEV_MODE=true`.
 
-## Keep TypeScript project references up to date
+Собрать образы приложения:
 
-Nx automatically updates TypeScript [project references](https://www.typescriptlang.org/docs/handbook/project-references.html) in `tsconfig.json` files to ensure they remain accurate based on your project dependencies (`import` or `require` statements). This sync is automatically done when running tasks such as `build` or `typecheck`, which require updated references to function correctly.
-
-To manually trigger the process to sync the project graph dependencies information to the TypeScript project references, run the following command:
-
-```sh
-npx nx sync
+```bash
+docker compose -f docker-compose.dev.yml build
 ```
 
-You can enforce that the TypeScript project references are always in the correct state when running in CI by adding a step to your CI job configuration that runs the following command:
+Запустить приложение в dev-режиме:
 
-```sh
-npx nx sync:check
+```bash
+docker compose -f docker-compose.dev.yml up -d
 ```
 
-[Learn more about nx sync](https://nx.dev/reference/nx-commands#sync)
+Запустить приложение из готовых образов:
 
-## Nx Cloud
-
-Nx Cloud ensures a [fast and scalable CI](https://nx.dev/nx-cloud?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) pipeline. It includes features such as:
-
-- [Remote caching](https://nx.dev/docs/features/ci-features/remote-cache?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task distribution across multiple machines](https://nx.dev/docs/features/ci-features/distribute-task-execution?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Automated e2e test splitting](https://nx.dev/docs/features/ci-features/split-e2e-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task flakiness detection and rerunning](https://nx.dev/docs/features/ci-features/flaky-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-### Set up CI (non-Github Actions CI)
-
-**Note:** This is only required if your CI provider is not GitHub Actions.
-
-Use the following command to configure a CI workflow for your workspace:
-
-```sh
-npx nx g ci-workflow
+```bash
+docker compose up -d
 ```
 
-[Learn more about Nx on CI](https://nx.dev/docs/features/ci-features?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+Для публикации образов задайте в `.env` свой `DOCKER_REGISTRY` и `DOCKER_APPS_VERSION`, затем соберите и отправьте образы. Имена образов: `bank-crm-gateway`, `bank-crm-user`, `bank-crm-card`, `bank-crm-report`, `bank-crm-log`, `bank-crm-client`, `bank-crm-migrator`.
 
-## Install Nx Console
+Приложение в Docker: клиент http://localhost:8081, API http://localhost:4000/api. Nginx проксирует `/api` на `gateway:4000`.
 
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
+## Создание администратора
 
-[Install Nx Console &raquo;](https://nx.dev/docs/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+Первого администратора нельзя создать через API: создание сотрудника требует токен `SUPERADMIN`, а зарегистрироваться самостоятельно сотрудник может только по заранее созданной учётной записи. Поэтому первый `SUPERADMIN` создаётся скриптом напрямую в БД:
 
-## 🔗 Learn More
+```bash
+npm run seed:admin -- --email admin@bank.local --password Admin12345
+```
 
-- [Nx Documentation](https://nx.dev/docs)
-- [Crafting Your Workspace Tutorial](https://nx.dev/docs/getting-started/tutorials/crafting-your-workspace)
-- [Module Boundaries](https://nx.dev/docs/features/enforce-module-boundaries)
-- [Releasing Packages](https://nx.dev/docs/features/manage-releases)
-- [Nx Plugins](https://nx.dev/docs/concepts/nx-plugins)
-- [Nx Cloud](https://nx.dev/nx-cloud)
+Скрипт использует `USER_DB_URL` из `.env`, создаёт запись в `users` и `auth_employers` с ролью `SUPERADMIN` и хеширует пароль через argon2. Пароль должен содержать минимум 8 символов, строчную и заглавную буквы и цифру.
 
-## 💬 Community
+Дополнительные параметры: `--name`, `--surname`, `--phone`.
 
-Join the Nx community:
+После создания войдите в клиенте на странице `/login` в режиме сотрудника или через API:
 
-- [Discord](https://go.nx.dev/community)
-- [X (Twitter)](https://twitter.com/nxdevtools)
-- [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [YouTube](https://www.youtube.com/@nxdevtools)
-- [Blog](https://nx.dev/blog)
+```bash
+curl -X POST http://localhost:4000/api/user/employee/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@bank.local","password":"Admin12345"}'
+```
+
+Дальше администратор создаёт сотрудников через `POST /api/user/employeeadmin/employees` (нужен заголовок `Authorization: Bearer <accessToken>`). Созданный сотрудник устанавливает пароль через `POST /api/user/employee/register` в течение 3 часов, после чего может входить через `/api/user/employee/login`.
+
+## RabbitMQ и Redis
+
+Сервисы `user`, `card` и `report` при изменяющих операциях публикуют событие `log.create` в очередь `log`. Сервис `log` — единственный потребитель этой очереди: он сразу записывает событие в таблицу `logs` своей БД.
+
+Чтение журнала кешируется в Redis. После записи нового события версия кеша увеличивается, поэтому устаревшие страницы журнала не возвращаются. Если Redis недоступен, сервис продолжает работать без кеша.
+
+Переменные RabbitMQ: `BANK_CRM_RMQ_URL`, `BANK_CRM_RMQ_USER`, `BANK_CRM_RMQ_PASSWORD`.
+
+Переменные Redis: `BANK_CRM_REDIS_URL`, `BANK_CRM_REDIS_PASSWORD`, `BANK_CRM_LOG_CACHE_TTL`.

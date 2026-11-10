@@ -2,7 +2,10 @@ import { Injectable } from '@nestjs/common'
 import { LogDatabaseService } from '@org/log-database'
 import { PaginationUtil } from '@org/shared-utils'
 
+import { LogCacheUtil } from './cache.util.js'
+
 import type { Log, LogWhereInput } from '@org/log-database'
+import type { LogMessage } from '@org/rmq-messages'
 
 export interface LogPaginationData {
   page?: number
@@ -44,7 +47,24 @@ export class LogDatabaseUtil {
   constructor(
     protected readonly db: LogDatabaseService,
     protected readonly pagination: PaginationUtil,
+    protected readonly cache: LogCacheUtil,
   ) {}
+
+  async createLog(data: LogMessage): Promise<void> {
+    await this.db.log.create({
+      data: {
+        service: data.service,
+        entity: data.entity,
+        method: data.method,
+        action: data.action,
+        userId: data.userId,
+        data: data.data === undefined ? undefined : JSON.parse(JSON.stringify(data.data)),
+        userAgent: data.userAgent,
+      },
+    })
+
+    await this.cache.invalidate()
+  }
 
   async getLogs(data: LogPaginationData): Promise<LogListResult> {
     const where = this.buildWhere(data)

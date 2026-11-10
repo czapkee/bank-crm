@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common'
 import { CardPaymentStatus as DbCardPaymentStatus } from '@org/card-database'
 import { CardAuthUtil, CardDatabaseUtil, CardMapUtil, CardValidateUtil } from '@org/card-utils'
+import { LogPublisher } from '@org/rmq-config'
+import { CARD_LOG_ACTIONS } from '@org/rmq-messages'
 
 import type {
   ChangePaymentStatusInput,
@@ -22,6 +24,7 @@ export class PaymentAdminFeatureService implements PaymentAdminServiceContract {
     private readonly auth: CardAuthUtil,
     private readonly validate: CardValidateUtil,
     private readonly map: CardMapUtil,
+    private readonly log: LogPublisher,
   ) {}
 
   async GetPayments(data: GetPaymentsInput): Promise<PaginatedPaymentsOutput> {
@@ -51,7 +54,7 @@ export class PaymentAdminFeatureService implements PaymentAdminServiceContract {
   }
 
   async CreatePayment(data: CreatePaymentInput): Promise<PaymentOutput> {
-    this.auth.validateEmployeeAccess(data.validation.accessToken)
+    const actor = this.auth.validateEmployeeAccess(data.validation.accessToken)
     await this.validate.validateCardExists(data.cardId)
     const sum = this.validate.validateSum(data.sum)
     const dateAndTime = this.validate.validateDateAndTime(data.dateAndTime)
@@ -71,22 +74,49 @@ export class PaymentAdminFeatureService implements PaymentAdminServiceContract {
       status,
     })
 
+    this.log.publish({
+      service: 'card',
+      entity: 'Payment',
+      method: 'CreatePayment',
+      action: CARD_LOG_ACTIONS.PAYMENT_ADMIN_CREATE,
+      userId: actor.id,
+      data: { paymentId: payment.id, cardId: data.cardId, sum: data.sum },
+    })
+
     return this.map.mapPayment(payment)
   }
 
   async ChangePaymentStatus(data: ChangePaymentStatusInput): Promise<PaymentOutput> {
-    this.auth.validateEmployeeAccess(data.validation.accessToken)
+    const actor = this.auth.validateEmployeeAccess(data.validation.accessToken)
     await this.validate.validatePaymentExists(data.id)
     const status = this.validate.validatePaymentStatus(data.status)
     const payment = await this.db.changePaymentStatus(data.id, status)
+
+    this.log.publish({
+      service: 'card',
+      entity: 'Payment',
+      method: 'ChangePaymentStatus',
+      action: CARD_LOG_ACTIONS.PAYMENT_ADMIN_CHANGE_STATUS,
+      userId: actor.id,
+      data: { paymentId: data.id, status: data.status },
+    })
 
     return this.map.mapPayment(payment)
   }
 
   async DeletePayment(data: PaymentActionInput): Promise<Empty> {
-    this.auth.validateEmployeeAccess(data.validation.accessToken)
+    const actor = this.auth.validateEmployeeAccess(data.validation.accessToken)
     await this.validate.validatePaymentExists(data.id)
     await this.db.deletePayment(data.id)
+
+    this.log.publish({
+      service: 'card',
+      entity: 'Payment',
+      method: 'DeletePayment',
+      action: CARD_LOG_ACTIONS.PAYMENT_ADMIN_DELETE,
+      userId: actor.id,
+      data: { paymentId: data.id },
+    })
 
     return {}
   }

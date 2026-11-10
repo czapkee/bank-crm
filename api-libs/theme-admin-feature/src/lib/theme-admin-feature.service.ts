@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { ReportAuthUtil, ReportDatabaseUtil, ReportMapUtil, ReportValidateUtil } from '@org/report-utils'
+import { LogPublisher } from '@org/rmq-config'
+import { THEME_LOG_ACTIONS } from '@org/rmq-messages'
 
 import type {
   CreateThemeInput,
@@ -21,6 +23,7 @@ export class ThemeAdminFeatureService implements ThemeAdminServiceContract {
     private readonly auth: ReportAuthUtil,
     private readonly validate: ReportValidateUtil,
     private readonly map: ReportMapUtil,
+    private readonly log: LogPublisher,
   ) {}
 
   async GetThemes(data: GetThemesAdminInput): Promise<PaginatedThemesOutput> {
@@ -39,7 +42,7 @@ export class ThemeAdminFeatureService implements ThemeAdminServiceContract {
   }
 
   async CreateTheme(data: CreateThemeInput): Promise<ThemeOutput> {
-    this.auth.validateAdminAccess(data.validation.accessToken)
+    const actor = this.auth.validateAdminAccess(data.validation.accessToken)
     const name = this.validate.validateThemeName(data.name)
     const description =
       data.description === undefined
@@ -54,11 +57,20 @@ export class ThemeAdminFeatureService implements ThemeAdminServiceContract {
 
     const theme = await this.db.createTheme({ name, description, parentId })
 
+    this.log.publish({
+      service: 'report',
+      entity: 'Theme',
+      method: 'CreateTheme',
+      action: THEME_LOG_ACTIONS.ADMIN_CREATE,
+      userId: actor.id,
+      data: { themeId: theme.id, name: theme.name },
+    })
+
     return this.map.mapTheme(theme)
   }
 
   async UpdateTheme(data: UpdateThemeInput): Promise<ThemeOutput> {
-    this.auth.validateAdminAccess(data.validation.accessToken)
+    const actor = this.auth.validateAdminAccess(data.validation.accessToken)
     await this.validate.validateThemeExists(data.id)
     const name = data.name === undefined ? undefined : this.validate.validateThemeName(data.name)
     const description =
@@ -76,14 +88,32 @@ export class ThemeAdminFeatureService implements ThemeAdminServiceContract {
 
     const theme = await this.db.updateTheme(data.id, { name, description, parentId })
 
+    this.log.publish({
+      service: 'report',
+      entity: 'Theme',
+      method: 'UpdateTheme',
+      action: THEME_LOG_ACTIONS.ADMIN_UPDATE,
+      userId: actor.id,
+      data: { themeId: data.id, changes: { ...data } },
+    })
+
     return this.map.mapTheme(theme)
   }
 
   async DeleteTheme(data: ThemeActionInput): Promise<Empty> {
-    this.auth.validateAdminAccess(data.validation.accessToken)
+    const actor = this.auth.validateAdminAccess(data.validation.accessToken)
     await this.validate.validateThemeExists(data.id)
     await this.validate.validateThemeHasNoChildren(data.id)
     await this.db.deleteTheme(data.id)
+
+    this.log.publish({
+      service: 'report',
+      entity: 'Theme',
+      method: 'DeleteTheme',
+      action: THEME_LOG_ACTIONS.ADMIN_DELETE,
+      userId: actor.id,
+      data: { themeId: data.id },
+    })
 
     return {}
   }

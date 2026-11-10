@@ -46,8 +46,8 @@ export function usePayments(): UsePaymentsReturn {
     )
 
     if (result) {
-      payments.value = result.payments
-      pagination.value = result.pagination
+      payments.value = result.payments ?? []
+      pagination.value = result.pagination ?? null
     }
 
     return result
@@ -62,8 +62,8 @@ export function usePayments(): UsePaymentsReturn {
     )
 
     if (result) {
-      payments.value = result.payments
-      pagination.value = result.pagination
+      payments.value = result.payments ?? []
+      pagination.value = result.pagination ?? null
     }
 
     return result
@@ -78,8 +78,8 @@ export function usePayments(): UsePaymentsReturn {
     )
 
     if (result) {
-      payments.value = result.payments
-      pagination.value = result.pagination
+      payments.value = result.payments ?? []
+      pagination.value = result.pagination ?? null
     }
 
     return result
@@ -94,8 +94,8 @@ export function usePayments(): UsePaymentsReturn {
     )
 
     if (result) {
-      payments.value = result.payments
-      pagination.value = result.pagination
+      payments.value = result.payments ?? []
+      pagination.value = result.pagination ?? null
     }
 
     return result

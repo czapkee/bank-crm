@@ -37,6 +37,7 @@ export async function microservice<T>(
       url: `0.0.0.0:${env.GRPC_PORT}`,
       loader: {
         includeDirs: [join(workspaceRoot, 'proto')],
+        defaults: true,
       },
     },
   });

@@ -40,8 +40,8 @@ export function useThemes(): UseThemesReturn {
     )
 
     if (result) {
-      themes.value = result.themes
-      pagination.value = result.pagination
+      themes.value = result.themes ?? []
+      pagination.value = result.pagination ?? null
     }
 
     return result
@@ -56,8 +56,8 @@ export function useThemes(): UseThemesReturn {
     )
 
     if (result) {
-      themes.value = result.themes
-      pagination.value = result.pagination
+      themes.value = result.themes ?? []
+      pagination.value = result.pagination ?? null
     }
 
     return result

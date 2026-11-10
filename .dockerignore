@@ -1,0 +1,23 @@
+# dependencies
+node_modules
+**/node_modules
+
+# build output
+dist
+**/dist
+.nx
+tmp
+out-tsc
+
+# local env and secrets
+.env
+.env.*
+!.env.example
+
+# git and tooling
+.git
+.gitignore
+.zed
+.idea
+.vscode
+**/*.log

@@ -56,8 +56,8 @@ export function useReports(): UseReportsReturn {
     )
 
     if (result) {
-      reports.value = result.reports
-      pagination.value = result.pagination
+      reports.value = result.reports ?? []
+      pagination.value = result.pagination ?? null
     }
 
     return result
@@ -72,8 +72,8 @@ export function useReports(): UseReportsReturn {
     )
 
     if (result) {
-      reports.value = result.reports
-      pagination.value = result.pagination
+      reports.value = result.reports ?? []
+      pagination.value = result.pagination ?? null
     }
 
     return result

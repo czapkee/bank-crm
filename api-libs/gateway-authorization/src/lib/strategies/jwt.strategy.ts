@@ -13,7 +13,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
       secretOrKey:
-        config.get<string>('BANK-CRM_JWT_SECRET') ??
         config.get<string>('BANK_CRM_JWT_SECRET') ??
         'DEFAULT_JWT_SECRET_DONT_USE_IN_PRODUCTION',
     })

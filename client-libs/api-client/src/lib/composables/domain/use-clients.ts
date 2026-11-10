@@ -51,8 +51,8 @@ export function useClients(): UseClientsReturn {
     )
 
     if (result) {
-      clients.value = result.clients
-      pagination.value = result.pagination
+      clients.value = result.clients ?? []
+      pagination.value = result.pagination ?? null
     }
 
     return result

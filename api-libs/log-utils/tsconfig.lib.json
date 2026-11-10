@@ -29,6 +29,9 @@
       "path": "../../shared-libs/grpc-types/tsconfig.lib.json"
     },
     {
+      "path": "../../shared-libs/rmq-messages/tsconfig.lib.json"
+    },
+    {
       "path": "../../shared-libs/enums/tsconfig.lib.json"
     },
     {

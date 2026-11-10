@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common'
 import { ReportFeedback as DbReportFeedback } from '@org/report-database'
 import { ReportAuthUtil, ReportDatabaseUtil, ReportMapUtil, ReportValidateUtil } from '@org/report-utils'
+import { LogPublisher } from '@org/rmq-config'
+import { REPORT_LOG_ACTIONS } from '@org/rmq-messages'
 
 import type {
   CreateReportInput,
@@ -21,6 +23,7 @@ export class ReportFeatureService implements ReportServiceContract {
     private readonly auth: ReportAuthUtil,
     private readonly validate: ReportValidateUtil,
     private readonly map: ReportMapUtil,
+    private readonly log: LogPublisher,
   ) {}
 
   async CreateReport(data: CreateReportInput): Promise<ReportOutput> {
@@ -47,6 +50,15 @@ export class ReportFeatureService implements ReportServiceContract {
       feedbackContact,
       themeId,
       feedbackType,
+    })
+
+    this.log.publish({
+      service: 'report',
+      entity: 'Report',
+      method: 'CreateReport',
+      action: REPORT_LOG_ACTIONS.CREATE,
+      userId: payload.id,
+      data: { reportId: report.id, title: report.title },
     })
 
     return this.map.mapReport(report)
@@ -101,6 +113,15 @@ export class ReportFeatureService implements ReportServiceContract {
       feedbackType,
     })
 
+    this.log.publish({
+      service: 'report',
+      entity: 'Report',
+      method: 'UpdateMyReport',
+      action: REPORT_LOG_ACTIONS.UPDATE,
+      userId: payload.id,
+      data: { reportId: data.id, changes: { ...data } },
+    })
+
     return this.map.mapReport(report)
   }
 
@@ -108,6 +129,15 @@ export class ReportFeatureService implements ReportServiceContract {
     const payload = this.auth.validateClientAccess(data.validation.accessToken)
     await this.validate.validateOwnedReport(data.id, payload.id)
     await this.db.deleteReport(data.id)
+
+    this.log.publish({
+      service: 'report',
+      entity: 'Report',
+      method: 'DeleteMyReport',
+      action: REPORT_LOG_ACTIONS.DELETE,
+      userId: payload.id,
+      data: { reportId: data.id },
+    })
 
     return {}
   }

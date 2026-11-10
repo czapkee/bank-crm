@@ -4,7 +4,7 @@ import { AppModule } from './app.module';
 
 void monolith({
   module: AppModule,
-  scope: 'BANK-CRM',
+  scope: 'BANK_CRM',
   name: 'Gateway',
   logs: true,
   prefix: true,

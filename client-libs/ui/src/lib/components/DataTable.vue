@@ -12,7 +12,7 @@ const props = withDefaults(
     selectedKey?: string | null
     compact?: boolean
   }>(),
-  { rowKey: 'id', loading: false, emptyText: 'Нет данных', clickable: false, selectedKey: null, compact: false },
+  { rowKey: 'id', rows: () => [], loading: false, emptyText: 'Нет данных', clickable: false, selectedKey: null, compact: false },
 )
 
 const emit = defineEmits<{ rowClick: [row: any] }>()

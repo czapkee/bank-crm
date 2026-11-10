@@ -24,12 +24,13 @@ import { JwtStrategy } from './strategies/jwt.strategy.js'
           transport: Transport.GRPC,
           options: {
             url:
-              config.get<string>('BANK-CRM_USER_GRPC_URL') ??
+              config.get<string>('BANK_CRM_USER_GRPC_URL') ??
               config.get<string>('BANK_CRM_USER_GRPC_URL', 'localhost:5003'),
             package: 'user',
             protoPath: join(workspaceRoot, 'proto/user.proto'),
             loader: {
               includeDirs: [join(workspaceRoot, 'proto')],
+              defaults: true,
             },
           },
         }),

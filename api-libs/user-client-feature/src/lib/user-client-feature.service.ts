@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common'
+import { LogPublisher } from '@org/rmq-config'
+import { USER_LOG_ACTIONS } from '@org/rmq-messages'
 import { UserDatabaseUtil, UserMapUtil, UserPasswordUtil, UserTokenUtil, UserValidateUtil } from '@org/user-utils'
 
 import type {
@@ -24,6 +26,7 @@ export class UserClientFeatureService implements ClientServiceContract {
     private readonly password: UserPasswordUtil,
     private readonly token: UserTokenUtil,
     private readonly map: UserMapUtil,
+    private readonly log: LogPublisher,
   ) {}
 
   async Register(data: ClientRegisterInput): Promise<ClientAuthOutput> {
@@ -32,11 +35,29 @@ export class UserClientFeatureService implements ClientServiceContract {
     const passwordHash = await this.password.hashPassword(data.password)
     const auth = await this.db.createClient(data.email, passwordHash)
 
+    this.log.publish({
+      service: 'user',
+      entity: 'Client',
+      method: 'Register',
+      action: USER_LOG_ACTIONS.CLIENT_REGISTER,
+      userId: auth.user.id,
+      data: { email: data.email },
+    })
+
     return this.token.generateTokens(auth.user.id, 'client')
   }
 
   async Login(data: ClientLoginInput): Promise<ClientAuthOutput> {
     const auth = await this.validate.validateClientCredentials(data.email, data.password)
+
+    this.log.publish({
+      service: 'user',
+      entity: 'Client',
+      method: 'Login',
+      action: USER_LOG_ACTIONS.CLIENT_LOGIN,
+      userId: auth.user.id,
+      data: { email: data.email },
+    })
 
     return this.token.generateTokens(auth.user.id, 'client')
   }
@@ -64,6 +85,15 @@ export class UserClientFeatureService implements ClientServiceContract {
     await this.validate.validateProfileUnique(data, auth.user.id)
     const updated = await this.db.updateClientProfile(auth.user.id, data)
 
+    this.log.publish({
+      service: 'user',
+      entity: 'Client',
+      method: 'UpdateProfile',
+      action: USER_LOG_ACTIONS.CLIENT_UPDATE_PROFILE,
+      userId: auth.user.id,
+      data: { ...data },
+    })
+
     return this.map.mapClient(updated)
   }
 
@@ -74,6 +104,14 @@ export class UserClientFeatureService implements ClientServiceContract {
     const passwordHash = await this.password.hashPassword(data.newPassword)
     await this.db.updateClientPassword(auth.user.id, passwordHash)
 
+    this.log.publish({
+      service: 'user',
+      entity: 'Client',
+      method: 'ChangePassword',
+      action: USER_LOG_ACTIONS.CLIENT_CHANGE_PASSWORD,
+      userId: auth.user.id,
+    })
+
     return {}
   }
 
@@ -81,6 +119,15 @@ export class UserClientFeatureService implements ClientServiceContract {
     const auth = await this.validate.validateClientAccess(data.validation.accessToken)
     await this.validate.validatePassword(auth.passwordHash, data.password)
     await this.db.deleteClient(auth.user.id)
+
+    this.log.publish({
+      service: 'user',
+      entity: 'Client',
+      method: 'DeleteAccount',
+      action: USER_LOG_ACTIONS.CLIENT_DELETE_ACCOUNT,
+      userId: auth.user.id,
+      data: { email: auth.email },
+    })
 
     return {}
   }
