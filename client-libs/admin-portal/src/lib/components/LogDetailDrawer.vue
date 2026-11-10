@@ -15,13 +15,17 @@ const loading = ref(true)
 
 const prettyData = computed(() => {
   const raw = log.value?.data
-  if (!raw) return null
+  if (raw === null || raw === undefined || raw === '') return null
 
-  try {
-    return JSON.stringify(JSON.parse(raw), null, 2)
-  } catch {
-    return raw
+  if (typeof raw === 'string') {
+    try {
+      return JSON.stringify(JSON.parse(raw), null, 2)
+    } catch {
+      return raw
+    }
   }
+
+  return JSON.stringify(raw, null, 2)
 })
 
 const methodTone = computed(() => {

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AppIcon from './AppIcon.vue'
 
-import type { IconName } from './AppIcon.vue'
+import type { IconName } from '../types.js'
 
 withDefaults(defineProps<{ icon?: IconName; title?: string; description?: string }>(), {
   icon: 'file',

@@ -89,7 +89,7 @@ function open(row: Record<string, unknown>): void {
         <template #cell-balance="{ row }">
           <span class="tabular-nums">{{ formatMoney(row.balance) }}</span>
         </template>
-        <template #cell-actions>
+        <template #cell-actions="{ row }">
           <button type="button" class="text-[11px] text-muted underline decoration-line underline-offset-4 hover:text-ink" @click.stop="open(row)">
             детали
           </button>

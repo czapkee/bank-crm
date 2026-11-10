@@ -24,7 +24,7 @@ const loading = ref(true)
 
 const themeName = computed(() => {
   if (!report.value?.themeId) return '—'
-  return themes.themes.find((theme) => theme.id === report.value?.themeId)?.name ?? '—'
+  return themes.themes.value.find((theme) => theme.id === report.value?.themeId)?.name ?? '—'
 })
 
 const isClosed = computed(() => report.value?.status === 'CLOSED')
