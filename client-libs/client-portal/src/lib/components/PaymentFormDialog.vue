@@ -1,8 +1,10 @@
 <script setup lang="ts">
 
 import { extractApiError, usePayments, useToastStore } from '@org/api-client'
-import { Button, Input, Modal, Select , PAYMENT_REFERENCE_OPTIONS, formatMoney } from '@org/ui'
-import { computed, reactive, ref } from 'vue'
+import { Button, Input, Modal, Select, PAYMENT_REFERENCE_OPTIONS, formatMoney, paymentWriteOffSchema } from '@org/ui'
+import { toTypedSchema } from '@vee-validate/zod'
+import { useForm } from 'vee-validate'
+import { computed, ref } from 'vue'
 
 import type { PaymentReference } from '@org/enums'
 import type { CardOutput } from '@org/shared-types'
@@ -16,15 +18,23 @@ const emit = defineEmits<{ close: []; created: [] }>()
 const payments = usePayments()
 const toast = useToastStore()
 
-const form = reactive({
-  cardId: (props.defaultCardId || props.cards[0]?.id) as string | undefined,
-  sum: '',
-  service: '',
-  reference: 'PAYMENT_FOR_GOODS_AND_SERVICES',
-})
-
 const error = ref<string | null>(null)
 const saving = ref(false)
+
+const { handleSubmit, errors, defineField } = useForm({
+  validationSchema: toTypedSchema(paymentWriteOffSchema),
+  initialValues: {
+    cardId: props.defaultCardId || props.cards[0]?.id || '',
+    sum: '',
+    service: '',
+    reference: 'PAYMENT_FOR_GOODS_AND_SERVICES',
+  },
+})
+
+const [cardId] = defineField('cardId')
+const [sum] = defineField('sum')
+const [service] = defineField('service')
+const [reference] = defineField('reference')
 
 const cardOptions = computed(() =>
   props.cards.map((card) => ({
@@ -33,33 +43,17 @@ const cardOptions = computed(() =>
   })),
 )
 
-const selectedCard = computed(() => props.cards.find((card) => card.id === form.cardId))
+const selectedCard = computed(() => props.cards.find((card) => card.id === cardId.value))
 
-async function submit(): Promise<void> {
+async function submit(values: Record<string, unknown>): Promise<void> {
   error.value = null
-
-  if (!form.cardId) {
-    error.value = 'Выберите карту'
-    return
-  }
-
-  if (!form.sum || Number(form.sum) <= 0) {
-    error.value = 'Укажите сумму списания'
-    return
-  }
-
-  if (!form.service.trim()) {
-    error.value = 'Укажите назначение платежа'
-    return
-  }
-
   saving.value = true
 
   try {
-    const result = await payments.writeOff(form.cardId, {
-      sum: Number(form.sum).toFixed(2),
-      service: form.service.trim(),
-      reference: form.reference as PaymentReference,
+    const result = await payments.writeOff(String(values.cardId), {
+      sum: Number(values.sum).toFixed(2),
+      service: String(values.service ?? '').trim(),
+      reference: String(values.reference) as PaymentReference,
     })
 
     if (!result) {
@@ -76,22 +70,24 @@ async function submit(): Promise<void> {
     saving.value = false
   }
 }
+
+const onSubmit = handleSubmit(submit)
 </script>
 
 <template>
   <Modal open title="Новый платёж" description="Списание средств с выбранной карты." size="md" @close="emit('close')">
-    <form class="space-y-4" @submit.prevent="submit">
-      <Select v-model="form.cardId" label="карта" :options="cardOptions" placeholder="выберите карту" required />
+    <form class="space-y-4" @submit.prevent="onSubmit">
+      <Select v-model="cardId" label="карта" :options="cardOptions" placeholder="выберите карту" :error="errors.cardId" required />
       <p v-if="selectedCard" class="-mt-2 text-[11px] text-muted">
         Доступный остаток: <span class="tabular-nums text-ink">{{ formatMoney(selectedCard.balance) }}</span>
       </p>
 
       <div class="grid gap-4 sm:grid-cols-2">
-        <Input v-model="form.sum" label="сумма" inputmode="decimal" placeholder="0,00" required />
-        <Select v-model="form.reference" label="назначение" :options="PAYMENT_REFERENCE_OPTIONS" required />
+        <Input v-model="sum" label="сумма" inputmode="decimal" placeholder="0,00" :error="errors.sum" required />
+        <Select v-model="reference" label="назначение" :options="PAYMENT_REFERENCE_OPTIONS" :error="errors.reference" required />
       </div>
 
-      <Input v-model="form.service" label="сервис" placeholder="например, оплата товаров" required />
+      <Input v-model="service" label="сервис" placeholder="например, оплата товаров" :error="errors.service" required />
 
       <p v-if="error" class="rounded-[4px] border border-danger/25 bg-danger/5 px-3 py-2.5 text-[12px] text-danger">
         {{ error }}

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { extractApiError, useAuthStore, useToastStore } from '@org/api-client'
-import { Button, Input, Tabs } from '@org/ui'
+import { Button, Input, Tabs, loginSchema } from '@org/ui'
+import { toTypedSchema } from '@vee-validate/zod'
+import { useForm } from 'vee-validate'
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -15,10 +17,15 @@ const router = useRouter()
 const route = useRoute()
 
 const mode = ref<AuthUserType>('client')
-const email = ref('')
-const password = ref('')
 const error = ref<string | null>(null)
 const loading = ref(false)
+
+const { handleSubmit, errors, defineField } = useForm({
+  validationSchema: toTypedSchema(loginSchema),
+})
+
+const [email] = defineField('email')
+const [password] = defineField('password')
 
 const tabs = [
   { value: 'client', label: 'клиент' },
@@ -31,12 +38,12 @@ onMounted(() => {
   }
 })
 
-async function submit(): Promise<void> {
+async function submit(values: Record<string, unknown>): Promise<void> {
   error.value = null
   loading.value = true
 
   try {
-    await auth.login(mode.value, email.value.trim(), password.value)
+    await auth.login(mode.value, String(values.email ?? '').trim(), String(values.password ?? ''))
     toast.success('Добро пожаловать')
 
     const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : null
@@ -48,6 +55,8 @@ async function submit(): Promise<void> {
     loading.value = false
   }
 }
+
+const onSubmit = handleSubmit(submit)
 </script>
 
 <template>
@@ -65,13 +74,14 @@ async function submit(): Promise<void> {
       <Tabs v-model="mode" :items="tabs" />
     </div>
 
-    <form class="mt-6 space-y-4" @submit.prevent="submit">
+    <form class="mt-6 space-y-4" @submit.prevent="onSubmit">
       <Input
         v-model="email"
         label="email"
         type="email"
         autocomplete="email"
         placeholder="name@bank.local"
+        :error="errors.email"
         required
       />
       <Input
@@ -80,6 +90,7 @@ async function submit(): Promise<void> {
         type="password"
         autocomplete="current-password"
         placeholder="••••••••"
+        :error="errors.password"
         required
       />
 

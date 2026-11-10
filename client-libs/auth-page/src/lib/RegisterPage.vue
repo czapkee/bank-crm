@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { extractApiError, useAuthStore, useToastStore } from '@org/api-client'
-import { Button, Input } from '@org/ui'
+import { Button, Input, registerSchema } from '@org/ui'
+import { toTypedSchema } from '@vee-validate/zod'
+import { useForm } from 'vee-validate'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -11,24 +13,23 @@ const auth = useAuthStore()
 const toast = useToastStore()
 const router = useRouter()
 
-const email = ref('')
-const password = ref('')
-const confirmationPassword = ref('')
 const error = ref<string | null>(null)
 const loading = ref(false)
 
-async function submit(): Promise<void> {
+const { handleSubmit, errors, defineField } = useForm({
+  validationSchema: toTypedSchema(registerSchema),
+})
+
+const [email] = defineField('email')
+const [password] = defineField('password')
+const [confirmationPassword] = defineField('confirmationPassword')
+
+async function submit(values: { email: string; password: string; confirmationPassword: string }): Promise<void> {
   error.value = null
-
-  if (password.value !== confirmationPassword.value) {
-    error.value = 'Пароли не совпадают'
-    return
-  }
-
   loading.value = true
 
   try {
-    await auth.register(email.value.trim(), password.value, confirmationPassword.value)
+    await auth.register(values.email.trim(), values.password, values.confirmationPassword)
     toast.success('Аккаунт создан')
     await router.replace('/portal')
   } catch (cause) {
@@ -37,6 +38,8 @@ async function submit(): Promise<void> {
     loading.value = false
   }
 }
+
+const onSubmit = handleSubmit(submit)
 </script>
 
 <template>
@@ -52,15 +55,16 @@ async function submit(): Promise<void> {
       Для клиентов банка. Сотрудники получают доступ от администратора.
     </p>
 
-    <form class="mt-7 space-y-4" @submit.prevent="submit">
-      <Input v-model="email" label="email" type="email" autocomplete="email" placeholder="name@example.com" required />
-      <Input v-model="password" label="пароль" type="password" autocomplete="new-password" placeholder="••••••••" required />
+    <form class="mt-7 space-y-4" @submit.prevent="onSubmit">
+      <Input v-model="email" label="email" type="email" autocomplete="email" placeholder="name@example.com" :error="errors.email" required />
+      <Input v-model="password" label="пароль" type="password" autocomplete="new-password" placeholder="••••••••" :error="errors.password" required />
       <Input
         v-model="confirmationPassword"
         label="повторите пароль"
         type="password"
         autocomplete="new-password"
         placeholder="••••••••"
+        :error="errors.confirmationPassword"
         required
       />
 

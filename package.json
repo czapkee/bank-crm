@@ -49,6 +49,7 @@
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.10.0",
     "@tailwindcss/vite": "^4.3.3",
+    "@vee-validate/zod": "^4.15.1",
     "amqp-connection-manager": "^5.0.0",
     "amqplib": "^2.2.0",
     "argon2": "^0.45.1",
@@ -74,8 +75,10 @@
     "tailwindcss": "^4.3.3",
     "ua-parser-js": "^2.0.10",
     "uuid": "^14.0.3",
+    "vee-validate": "^4.15.1",
     "vue": "^3.5.13",
-    "vue-router": "^4.5.0"
+    "vue-router": "^4.5.0",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@eslint/js": "^9.8.0",

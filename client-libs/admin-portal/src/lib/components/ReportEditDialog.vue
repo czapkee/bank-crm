@@ -1,12 +1,15 @@
 <script setup lang="ts">
 
 import { extractApiError, useEmployees, useReports, useThemes, useToastStore } from '@org/api-client'
-import { Button, Input, Modal, Select, Textarea ,
+import { Button, Input, Modal, Select, Textarea,
   FEEDBACK_OPTIONS,
   PRIORITY_OPTIONS,
   REPORT_STATUS_OPTIONS,
+  reportEditSchema,
 } from '@org/ui'
-import { computed, onMounted, reactive, ref } from 'vue'
+import { toTypedSchema } from '@vee-validate/zod'
+import { useForm } from 'vee-validate'
+import { computed, onMounted, ref } from 'vue'
 
 import type { ReportFeedback, ReportPriority, ReportStatus } from '@org/enums'
 import type { ReportOutput } from '@org/shared-types'
@@ -22,16 +25,28 @@ const toast = useToastStore()
 const saving = ref(false)
 const error = ref<string | null>(null)
 
-const form = reactive({
-  title: props.report.title,
-  content: props.report.content,
-  feedbackContact: props.report.feedbackContact ?? '',
-  themeId: props.report.themeId ?? '',
-  status: props.report.status as string,
-  priority: props.report.priority as string,
-  feedbackType: props.report.feedbackType as string,
-  assignedToId: props.report.assignedToId ?? '',
+const { handleSubmit, errors, defineField } = useForm({
+  validationSchema: toTypedSchema(reportEditSchema),
+  initialValues: {
+    title: props.report.title,
+    content: props.report.content,
+    feedbackContact: props.report.feedbackContact ?? '',
+    themeId: props.report.themeId ?? '',
+    status: props.report.status as string,
+    priority: props.report.priority as string,
+    feedbackType: props.report.feedbackType as string,
+    assignedToId: props.report.assignedToId ?? '',
+  },
 })
+
+const [title] = defineField('title')
+const [content] = defineField('content')
+const [feedbackContact] = defineField('feedbackContact')
+const [themeId] = defineField('themeId')
+const [status] = defineField('status')
+const [priority] = defineField('priority')
+const [feedbackType] = defineField('feedbackType')
+const [assignedToId] = defineField('assignedToId')
 
 const themeOptions = computed(() =>
   themes.themes.value.map((theme) => ({
@@ -58,31 +73,20 @@ onMounted(async () => {
   }
 })
 
-async function submit(): Promise<void> {
+async function submit(values: Record<string, unknown>): Promise<void> {
   error.value = null
-
-  if (form.title.trim().length < 3) {
-    error.value = 'Укажите заголовок обращения'
-    return
-  }
-
-  if (form.content.trim().length < 3) {
-    error.value = 'Добавьте текст обращения'
-    return
-  }
-
   saving.value = true
 
   try {
     const result = await store.updateReport(props.report.id, {
-      title: form.title.trim(),
-      content: form.content.trim(),
-      feedbackContact: form.feedbackContact.trim() || undefined,
-      themeId: form.themeId || undefined,
-      status: form.status as ReportStatus,
-      priority: form.priority as ReportPriority,
-      feedbackType: form.feedbackType as ReportFeedback,
-      assignedToId: props.canAssign && form.assignedToId ? form.assignedToId : undefined,
+      title: String(values.title ?? '').trim(),
+      content: String(values.content ?? '').trim(),
+      feedbackContact: String(values.feedbackContact ?? '').trim() || undefined,
+      themeId: String(values.themeId ?? '') || undefined,
+      status: String(values.status) as ReportStatus,
+      priority: String(values.priority) as ReportPriority,
+      feedbackType: String(values.feedbackType) as ReportFeedback,
+      assignedToId: props.canAssign && values.assignedToId ? String(values.assignedToId) : undefined,
     })
 
     if (!result) {
@@ -99,29 +103,31 @@ async function submit(): Promise<void> {
     saving.value = false
   }
 }
+
+const onSubmit = handleSubmit(submit)
 </script>
 
 <template>
   <Modal open title="Редактирование обращения" size="lg" @close="emit('close')">
-    <form class="space-y-4" @submit.prevent="submit">
-      <Input v-model="form.title" label="заголовок" required />
+    <form class="space-y-4" @submit.prevent="onSubmit">
+      <Input v-model="title" label="заголовок" :error="errors.title" required />
 
       <div class="grid gap-4 sm:grid-cols-2">
-        <Select v-model="form.themeId" label="тема" :options="themeOptions" placeholder="без темы" />
-        <Select v-model="form.feedbackType" label="обратная связь" :options="FEEDBACK_OPTIONS" />
+        <Select v-model="themeId" label="тема" :options="themeOptions" placeholder="без темы" />
+        <Select v-model="feedbackType" label="обратная связь" :options="FEEDBACK_OPTIONS" :error="errors.feedbackType" />
       </div>
 
       <div class="grid gap-4 sm:grid-cols-2">
-        <Input v-model="form.feedbackContact" label="контакт" placeholder="телефон или email" />
-        <Select v-if="canAssign" v-model="form.assignedToId" label="исполнитель" :options="employeeOptions" placeholder="не назначен" />
+        <Input v-model="feedbackContact" label="контакт" placeholder="телефон или email" :error="errors.feedbackContact" />
+        <Select v-if="canAssign" v-model="assignedToId" label="исполнитель" :options="employeeOptions" placeholder="не назначен" />
       </div>
 
       <div class="grid gap-4 sm:grid-cols-2">
-        <Select v-model="form.status" label="статус" :options="REPORT_STATUS_OPTIONS" required />
-        <Select v-model="form.priority" label="приоритет" :options="PRIORITY_OPTIONS" required />
+        <Select v-model="status" label="статус" :options="REPORT_STATUS_OPTIONS" :error="errors.status" required />
+        <Select v-model="priority" label="приоритет" :options="PRIORITY_OPTIONS" :error="errors.priority" required />
       </div>
 
-      <Textarea v-model="form.content" label="текст обращения" :rows="7" required />
+      <Textarea v-model="content" label="текст обращения" :rows="7" :error="errors.content" required />
 
       <p v-if="error" class="rounded-[4px] border border-danger/25 bg-danger/5 px-3 py-2.5 text-[12px] text-danger">
         {{ error }}

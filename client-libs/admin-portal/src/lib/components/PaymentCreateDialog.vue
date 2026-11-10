@@ -1,8 +1,20 @@
 <script setup lang="ts">
 
 import { extractApiError, useCards, usePayments, useToastStore } from '@org/api-client'
-import { Button, Input, Modal, Select , PAYMENT_REFERENCE_OPTIONS, PAYMENT_STATUS_OPTIONS, formatMoney } from '@org/ui'
-import { computed, reactive, ref } from 'vue'
+import {
+  Button,
+  Input,
+  Modal,
+  Select,
+  PAYMENT_REFERENCE_OPTIONS,
+  PAYMENT_STATUS_OPTIONS,
+  formatCardNumber,
+  formatMoney,
+  paymentSchema,
+} from '@org/ui'
+import { toTypedSchema } from '@vee-validate/zod'
+import { useForm } from 'vee-validate'
+import { computed, ref } from 'vue'
 
 import type { CardPaymentStatus, PaymentReference } from '@org/enums'
 
@@ -16,18 +28,29 @@ const toast = useToastStore()
 
 const now = new Date()
 const localNow = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16)
-
-const form = reactive({
-  cardId: props.cardId || '',
-  sum: '',
-  service: '',
-  reference: 'PAYMENT_FOR_GOODS_AND_SERVICES',
-  status: 'APPROVED',
-  dateAndTime: localNow,
-})
+const initialCardId = props.cardId || cards.cards.value[0]?.id || ''
 
 const error = ref<string | null>(null)
 const saving = ref(false)
+
+const { handleSubmit, errors, defineField } = useForm({
+  validationSchema: toTypedSchema(paymentSchema),
+  initialValues: {
+    cardId: initialCardId,
+    sum: '',
+    service: '',
+    reference: 'PAYMENT_FOR_GOODS_AND_SERVICES',
+    status: 'APPROVED',
+    dateAndTime: localNow,
+  },
+})
+
+const [cardIdField] = defineField('cardId')
+const [sum] = defineField('sum')
+const [service] = defineField('service')
+const [reference] = defineField('reference')
+const [status] = defineField('status')
+const [dateAndTime] = defineField('dateAndTime')
 
 const cardOptions = computed(() =>
   cards.cards.value.map((card) => ({
@@ -36,35 +59,19 @@ const cardOptions = computed(() =>
   })),
 )
 
-const selectedCard = computed(() => cards.cards.value.find((card) => card.id === form.cardId))
+const selectedCard = computed(() => cards.cards.value.find((card) => card.id === cardIdField.value))
 
-async function submit(): Promise<void> {
+async function submit(values: Record<string, unknown>): Promise<void> {
   error.value = null
-
-  if (!form.cardId) {
-    error.value = 'Выберите карту'
-    return
-  }
-
-  if (!form.sum || Number(form.sum) <= 0) {
-    error.value = 'Укажите сумму платежа'
-    return
-  }
-
-  if (!form.service.trim()) {
-    error.value = 'Укажите сервис'
-    return
-  }
-
   saving.value = true
 
   try {
-    const result = await payments.createPayment(form.cardId, {
-      sum: Number(form.sum).toFixed(2),
-      service: form.service.trim(),
-      reference: form.reference as PaymentReference,
-      status: form.status as CardPaymentStatus,
-      dateAndTime: new Date(form.dateAndTime).toISOString(),
+    const result = await payments.createPayment(String(values.cardId), {
+      sum: Number(values.sum).toFixed(2),
+      service: String(values.service ?? '').trim(),
+      reference: String(values.reference) as PaymentReference,
+      status: String(values.status) as CardPaymentStatus,
+      dateAndTime: new Date(String(values.dateAndTime)).toISOString(),
     })
 
     if (!result) {
@@ -81,27 +88,29 @@ async function submit(): Promise<void> {
     saving.value = false
   }
 }
+
+const onSubmit = handleSubmit(submit)
 </script>
 
 <template>
   <Modal open title="Новый платёж" description="Операция по карте клиента." size="md" @close="emit('close')">
-    <form class="space-y-4" @submit.prevent="submit">
-      <Select v-model="form.cardId" label="карта" :options="cardOptions" placeholder="выберите карту" required />
+    <form class="space-y-4" @submit.prevent="onSubmit">
+      <Select v-model="cardIdField" label="карта" :options="cardOptions" placeholder="выберите карту" :error="errors.cardId" required />
       <p v-if="selectedCard" class="-mt-2 text-[11px] text-muted">
         Остаток: <span class="tabular-nums text-ink">{{ formatMoney(selectedCard.balance) }}</span>
       </p>
 
       <div class="grid gap-4 sm:grid-cols-2">
-        <Input v-model="form.sum" label="сумма" inputmode="decimal" placeholder="0,00" required />
-        <Select v-model="form.reference" label="назначение" :options="PAYMENT_REFERENCE_OPTIONS" required />
+        <Input v-model="sum" label="сумма" inputmode="decimal" placeholder="0,00" :error="errors.sum" required />
+        <Select v-model="reference" label="назначение" :options="PAYMENT_REFERENCE_OPTIONS" :error="errors.reference" required />
       </div>
 
       <div class="grid gap-4 sm:grid-cols-2">
-        <Input v-model="form.dateAndTime" label="дата и время" type="datetime-local" required />
-        <Select v-model="form.status" label="статус" :options="PAYMENT_STATUS_OPTIONS" required />
+        <Input v-model="dateAndTime" label="дата и время" type="datetime-local" :error="errors.dateAndTime" required />
+        <Select v-model="status" label="статус" :options="PAYMENT_STATUS_OPTIONS" :error="errors.status" required />
       </div>
 
-      <Input v-model="form.service" label="сервис" placeholder="например, оплата товаров" required />
+      <Input v-model="service" label="сервис" placeholder="например, оплата товаров" :error="errors.service" required />
 
       <p v-if="error" class="rounded-[4px] border border-danger/25 bg-danger/5 px-3 py-2.5 text-[12px] text-danger">
         {{ error }}

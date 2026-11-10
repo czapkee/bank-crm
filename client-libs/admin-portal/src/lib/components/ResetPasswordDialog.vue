@@ -1,7 +1,9 @@
 <script setup lang="ts">
 
 import { extractApiError, useClients, useEmployees, useToastStore } from '@org/api-client'
-import { Button, Input, Modal } from '@org/ui'
+import { Button, Input, Modal, resetPasswordSchema } from '@org/ui'
+import { toTypedSchema } from '@vee-validate/zod'
+import { useForm } from 'vee-validate'
 import { ref } from 'vue'
 
 const props = defineProps<{ kind: 'client' | 'employee'; targetId: string; targetName?: string }>()
@@ -11,31 +13,25 @@ const clients = useClients()
 const employees = useEmployees()
 const toast = useToastStore()
 
-const password = ref('')
-const confirmation = ref('')
 const error = ref<string | null>(null)
 const saving = ref(false)
 
-async function submit(): Promise<void> {
+const { handleSubmit, errors, defineField } = useForm({
+  validationSchema: toTypedSchema(resetPasswordSchema),
+})
+
+const [password] = defineField('password')
+const [confirmation] = defineField('confirmation')
+
+async function submit(values: Record<string, unknown>): Promise<void> {
   error.value = null
-
-  if (password.value.length < 8) {
-    error.value = 'Пароль должен содержать не менее 8 символов'
-    return
-  }
-
-  if (password.value !== confirmation.value) {
-    error.value = 'Пароли не совпадают'
-    return
-  }
-
   saving.value = true
 
   try {
     const ok =
       props.kind === 'client'
-        ? await clients.resetClientPassword(props.targetId, password.value)
-        : await employees.resetEmployeePassword(props.targetId, password.value)
+        ? await clients.resetClientPassword(props.targetId, String(values.password))
+        : await employees.resetEmployeePassword(props.targetId, String(values.password))
 
     if (!ok) {
       error.value = (props.kind === 'client' ? clients.error.value : employees.error.value) ?? 'Не удалось сбросить пароль'
@@ -51,13 +47,15 @@ async function submit(): Promise<void> {
     saving.value = false
   }
 }
+
+const onSubmit = handleSubmit(submit)
 </script>
 
 <template>
   <Modal open title="Сбросить пароль" :description="targetName ? `Новый пароль для ${targetName}` : undefined" size="sm" @close="emit('close')">
-    <form class="space-y-4" @submit.prevent="submit">
-      <Input v-model="password" label="новый пароль" type="password" autocomplete="new-password" required />
-      <Input v-model="confirmation" label="повторите пароль" type="password" autocomplete="new-password" required />
+    <form class="space-y-4" @submit.prevent="onSubmit">
+      <Input v-model="password" label="новый пароль" type="password" autocomplete="new-password" :error="errors.password" required />
+      <Input v-model="confirmation" label="повторите пароль" type="password" autocomplete="new-password" :error="errors.confirmation" required />
 
       <p v-if="error" class="rounded-[4px] border border-danger/25 bg-danger/5 px-3 py-2.5 text-[12px] text-danger">
         {{ error }}

@@ -1,7 +1,9 @@
 <script setup lang="ts">
 
 import { extractApiError, useReports, useThemes, useToastStore } from '@org/api-client'
-import { Button, Input, Modal, Select, Textarea } from '@org/ui'
+import { Button, Input, Modal, Select, Textarea, reportClientSchema } from '@org/ui'
+import { toTypedSchema } from '@vee-validate/zod'
+import { useForm } from 'vee-validate'
 import { computed, onMounted, ref } from 'vue'
 
 import type { ReportFeedback } from '@org/enums'
@@ -18,11 +20,24 @@ const loading = ref(true)
 const saving = ref(false)
 const error = ref<string | null>(null)
 
-const parentId = ref<string | undefined>(props.report?.themeId ?? props.initialThemeId ?? undefined)
-const themeId = ref<string | undefined>(undefined)
-const content = ref(props.report?.content ?? '')
-const feedbackType = ref<string>(props.report?.feedbackType ?? 'NOT_REQUIRED')
-const feedbackContact = ref(props.report?.feedbackContact ?? '')
+const parentId = ref<string>(props.report?.themeId ?? props.initialThemeId ?? '')
+
+const { handleSubmit, errors, defineField, setFieldValue } = useForm({
+  validationSchema: toTypedSchema(reportClientSchema),
+  initialValues: {
+    parentId: '',
+    themeId: '',
+    content: props.report?.content ?? '',
+    feedbackType: (props.report?.feedbackType ?? 'NOT_REQUIRED') as string,
+    feedbackContact: props.report?.feedbackContact ?? '',
+  },
+})
+
+const [parentIdField] = defineField('parentId')
+const [themeId] = defineField('themeId')
+const [content] = defineField('content')
+const [feedbackType] = defineField('feedbackType')
+const [feedbackContact] = defineField('feedbackContact')
 
 const parentOptions = computed(() =>
   themesStore.themes.value
@@ -30,17 +45,15 @@ const parentOptions = computed(() =>
     .map((theme) => ({ value: theme.id, label: theme.name })),
 )
 
-const children = computed(() => themesStore.themes.value.filter((theme) => theme.parentId === parentId.value))
+const children = computed(() => themesStore.themes.value.filter((theme) => theme.parentId === parentIdField.value))
 
 const themeOptions = computed(() => children.value.map((theme) => ({ value: theme.id, label: theme.name })))
-
-const effectiveThemeId = computed(() => themeId.value ?? parentId.value)
 
 const feedbackNeedsContact = computed(() => feedbackType.value === 'EMAIL' || feedbackType.value === 'PHONE_NUMBER')
 
 const title = computed(() => {
   if (props.report) return props.report.title
-  const selectedParent = themesStore.themes.value.find((theme) => theme.id === parentId.value)
+  const selectedParent = themesStore.themes.value.find((theme) => theme.id === parentIdField.value)
   const selectedChild = themesStore.themes.value.find((theme) => theme.id === themeId.value)
   return selectedChild?.name ?? selectedParent?.name ?? 'Обращение'
 })
@@ -52,45 +65,34 @@ onMounted(async () => {
   if (props.report?.themeId) {
     const theme = themesStore.themes.value.find((item) => item.id === props.report?.themeId)
     if (theme?.parentId) {
-      parentId.value = theme.parentId
-      themeId.value = theme.id
-    } else {
-      parentId.value = theme?.id
+      setFieldValue('parentId', theme.parentId)
+      setFieldValue('themeId', theme.id)
+    } else if (theme) {
+      setFieldValue('parentId', theme.id)
     }
+  } else if (parentId.value) {
+    setFieldValue('parentId', parentId.value)
   }
 })
 
 function onParentChange(): void {
-  themeId.value = children.value[0]?.id
+  const next = children.value[0]?.id ?? ''
+  setFieldValue('themeId', next)
 }
 
-async function submit(): Promise<void> {
+async function submit(values: Record<string, unknown>): Promise<void> {
   error.value = null
-
-  if (!effectiveThemeId.value) {
-    error.value = 'Выберите тему обращения'
-    return
-  }
-
-  if (content.value.trim().length < 3) {
-    error.value = 'Опишите ситуацию подробнее'
-    return
-  }
-
-  if (feedbackNeedsContact.value && feedbackContact.value.trim().length === 0) {
-    error.value = 'Укажите контакт для обратной связи'
-    return
-  }
-
   saving.value = true
 
   try {
+    const effectiveThemeId = String(values.themeId ?? '') || String(values.parentId ?? '')
+
     const payload = {
       title: title.value,
-      content: content.value.trim(),
-      themeId: effectiveThemeId.value,
-      feedbackType: feedbackType.value as ReportFeedback,
-      feedbackContact: feedbackNeedsContact.value ? feedbackContact.value.trim() : undefined,
+      content: String(values.content ?? '').trim(),
+      themeId: effectiveThemeId,
+      feedbackType: String(values.feedbackType) as ReportFeedback,
+      feedbackContact: feedbackNeedsContact.value ? String(values.feedbackContact ?? '').trim() : undefined,
     }
 
     const result = props.report
@@ -111,6 +113,8 @@ async function submit(): Promise<void> {
     saving.value = false
   }
 }
+
+const onSubmit = handleSubmit(submit)
 </script>
 
 <template>
@@ -121,27 +125,28 @@ async function submit(): Promise<void> {
     size="lg"
     @close="emit('close')"
   >
-    <form class="space-y-5" @submit.prevent="submit">
+    <form class="space-y-5" @submit.prevent="onSubmit">
       <div v-if="loading" class="py-8 text-center text-[12px] text-muted">Загрузка тем…</div>
 
       <div v-else class="space-y-3">
-        <div class="grid gap-3 sm:grid-cols-[130px_1fr] sm:items-center">
-          <span class="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">тема</span>
+        <div class="grid gap-3 sm:grid-cols-[130px_1fr] sm:items-start">
+          <span class="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted sm:pt-3">тема</span>
           <Select
-            v-model="parentId"
+            v-model="parentIdField"
             :options="parentOptions"
             placeholder="выберите тему"
+            :error="errors.parentId"
             @update:model-value="onParentChange"
           />
         </div>
 
-        <div v-if="themeOptions.length > 0" class="grid gap-3 sm:grid-cols-[130px_1fr] sm:items-center">
-          <span class="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">подтема</span>
+        <div v-if="themeOptions.length > 0" class="grid gap-3 sm:grid-cols-[130px_1fr] sm:items-start">
+          <span class="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted sm:pt-3">подтема</span>
           <Select v-model="themeId" :options="themeOptions" placeholder="выберите подтему" />
         </div>
 
-        <div class="grid gap-3 sm:grid-cols-[130px_1fr] sm:items-center">
-          <span class="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">обратная связь</span>
+        <div class="grid gap-3 sm:grid-cols-[130px_1fr] sm:items-start">
+          <span class="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted sm:pt-3">обратная связь</span>
           <Select
             v-model="feedbackType"
             :options="[
@@ -150,20 +155,22 @@ async function submit(): Promise<void> {
               { value: 'EMAIL', label: 'email' },
               { value: 'OTHER', label: 'другое' },
             ]"
+            :error="errors.feedbackType"
           />
         </div>
 
-        <div v-if="feedbackNeedsContact" class="grid gap-3 sm:grid-cols-[130px_1fr] sm:items-center">
-          <span class="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">контакт</span>
+        <div v-if="feedbackNeedsContact" class="grid gap-3 sm:grid-cols-[130px_1fr] sm:items-start">
+          <span class="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted sm:pt-3">контакт</span>
           <Input
             v-model="feedbackContact"
             :type="feedbackType === 'EMAIL' ? 'email' : 'text'"
             placeholder="как с вами связаться"
+            :error="errors.feedbackContact"
           />
         </div>
       </div>
 
-      <Textarea v-model="content" label="текст обращения" placeholder="текст обращения…" :rows="8" required />
+      <Textarea v-model="content" label="текст обращения" placeholder="текст обращения…" :rows="8" :error="errors.content" required />
 
       <p v-if="error" class="rounded-[4px] border border-danger/25 bg-danger/5 px-3 py-2.5 text-[12px] text-danger">
         {{ error }}

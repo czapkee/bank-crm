@@ -1,8 +1,10 @@
 <script setup lang="ts">
 
 import { extractApiError, useThemes, useToastStore } from '@org/api-client'
-import { Button, Input, Modal, Select, Textarea } from '@org/ui'
-import { computed, reactive, ref } from 'vue'
+import { Button, Input, Modal, Select, Textarea, themeSchema } from '@org/ui'
+import { toTypedSchema } from '@vee-validate/zod'
+import { useForm } from 'vee-validate'
+import { computed, ref } from 'vue'
 
 import type { ThemeOutput } from '@org/shared-types'
 
@@ -16,14 +18,21 @@ const toast = useToastStore()
 const theme = props.theme
 const isCreate = !theme
 
-const form = reactive({
-  name: theme?.name ?? '',
-  description: theme?.description ?? '',
-  parentId: theme?.parentId ?? '',
-})
-
 const saving = ref(false)
 const error = ref<string | null>(null)
+
+const { handleSubmit, errors, defineField } = useForm({
+  validationSchema: toTypedSchema(themeSchema),
+  initialValues: {
+    name: theme?.name ?? '',
+    description: theme?.description ?? '',
+    parentId: theme?.parentId ?? '',
+  },
+})
+
+const [name] = defineField('name')
+const [description] = defineField('description')
+const [parentId] = defineField('parentId')
 
 const parentOptions = computed(() =>
   store.themes.value
@@ -31,21 +40,15 @@ const parentOptions = computed(() =>
     .map((item) => ({ value: item.id, label: item.name })),
 )
 
-async function submit(): Promise<void> {
+async function submit(values: Record<string, unknown>): Promise<void> {
   error.value = null
-
-  if (form.name.trim().length < 2) {
-    error.value = 'Укажите название темы'
-    return
-  }
-
   saving.value = true
 
   try {
     const payload = {
-      name: form.name.trim(),
-      description: form.description.trim() || undefined,
-      parentId: form.parentId || undefined,
+      name: String(values.name ?? '').trim(),
+      description: String(values.description ?? '').trim() || undefined,
+      parentId: String(values.parentId ?? '') || undefined,
     }
 
     const result = isCreate
@@ -66,6 +69,8 @@ async function submit(): Promise<void> {
     saving.value = false
   }
 }
+
+const onSubmit = handleSubmit(submit)
 </script>
 
 <template>
@@ -76,10 +81,10 @@ async function submit(): Promise<void> {
     size="md"
     @close="emit('close')"
   >
-    <form class="space-y-4" @submit.prevent="submit">
-      <Input v-model="form.name" label="название" required />
-      <Select v-model="form.parentId" label="родительская тема" :options="parentOptions" placeholder="верхний уровень" />
-      <Textarea v-model="form.description" label="описание" :rows="4" />
+    <form class="space-y-4" @submit.prevent="onSubmit">
+      <Input v-model="name" label="название" :error="errors.name" required />
+      <Select v-model="parentId" label="родительская тема" :options="parentOptions" placeholder="верхний уровень" />
+      <Textarea v-model="description" label="описание" :rows="4" :error="errors.description" />
 
       <p v-if="error" class="rounded-[4px] border border-danger/25 bg-danger/5 px-3 py-2.5 text-[12px] text-danger">
         {{ error }}
