@@ -131,6 +131,24 @@
     },
     {
       "path": "./api-libs/gateway-controllers"
+    },
+    {
+      "path": "./client-libs/api-client"
+    },
+    {
+      "path": "./client-libs/ui"
+    },
+    {
+      "path": "./client-libs/app-layout"
+    },
+    {
+      "path": "./client-libs/auth-page"
+    },
+    {
+      "path": "./client-libs/client-portal"
+    },
+    {
+      "path": "./client-libs/admin-portal"
     }
   ],
   "compilerOptions": {}

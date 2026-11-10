@@ -33,6 +33,7 @@
   },
   "private": true,
   "dependencies": {
+    "@fontsource-variable/manrope": "^5.3.0",
     "@grpc/grpc-js": "^1.14.6",
     "@grpc/proto-loader": "^0.8.1",
     "@nestjs-modules/ioredis": "^2.3.1",
@@ -60,6 +61,7 @@
     "helmet": "^8.3.0",
     "ioredis": "^6.0.0",
     "nx": "^23.3.0",
+    "ofetch": "^1.5.1",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "pinia": "^4.0.3",
@@ -123,6 +125,12 @@
     "api-libs/*",
     "shared-libs/*",
     "client-libs/user-page",
-    "client-libs/card-page"
+    "client-libs/card-page",
+    "client-libs/api-client",
+    "client-libs/ui",
+    "client-libs/app-layout",
+    "client-libs/auth-page",
+    "client-libs/client-portal",
+    "client-libs/admin-portal"
   ]
 }
